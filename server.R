@@ -118,10 +118,11 @@ server <- function(input, output, session) {
   #### setup ----
   visualisation_parts <- reactiveValues()
   visualisation_parts$title <- "No group presently selected"
-  
-  
-  
-  
+  visualisation_parts$baby_journey <- NULL
+  visualisation_parts$mother_journey <- NULL
+  visualisation_parts$father_journey <- NULL
+  visualisation_parts$full_sib_journey <- NULL
+  visualisation_parts$half_sib_journey <- NULL
   
   #### update title ----
   update_title <- function(){
@@ -146,9 +147,22 @@ server <- function(input, output, session) {
     panel_control$view_half_sib <- "half sibling" %in% input$role_checkbox
   }
   
-  
   #### update journey ----
   update_journey <- function(){
+    
+    selected_measures <- c(input$health_journey_checkbox,
+                           input$employment_journey_checkbox, 
+                           input$mainbenefit_journey_checkbox,
+                           input$supportbenefit_journey_checkbox,
+                           input$education_journey_checkbox,
+                           input$justice_journey_checkbox,
+                           input$other_journey_checkbox)
+    
+    if('baby' %in% input$role_checkbox)
+      visualisation_parts$baby_journey <- plot_timeline(input$group_selectInput , 'baby', selected_measures)
+    if('mother' %in% input$role_checkbox)
+      visualisation_parts$mother_journey <- plot_timeline(input$group_selectInput , 'mother', selected_measures)
+
     
   }
   
@@ -161,9 +175,14 @@ server <- function(input, output, session) {
     # update_general()
   }
   
-  ## output --
+  ## output ----
   output$title <- renderText(visualisation_parts$title)
   
+  output$journey_baby <- renderPlotly( visualisation_parts$baby_journey$figure )
+  output$journey_mother <- renderPlotly( visualisation_parts$mother_journey$figure )
+  output$journey_father <- renderPlot( visualisation_parts$journey_father )
+  output$journey_full_sib <- renderPlot( visualisation_parts$journey_full_sib )
+  output$journey_half_sib <- renderPlot( visualisation_parts$journey_half_sib )
   
   
   ## other ----

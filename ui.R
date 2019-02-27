@@ -30,12 +30,15 @@ ui <- fluidPage(
   hr(),
   
   conditionalPanel("output.view_reset == 'show'",
-                   selectInput("group_selectInput", "Select group to investigate", choices = GROUP_LIST)),
+                   selectInput("group_selectInput", "Select group to investigate", choices = GROUP_LIST),
+                   hr()
+                   ),
   
   conditionalPanel("output.view_role == 'show'",
                    checkboxGroupInput("role_checkbox", "Select roles to display",
                                       choiceNames = ROLE_LIST,
-                                      choiceValues = ROLE_LIST)
+                                      choiceValues = ROLE_LIST),
+                   hr()
                    ),
   
   conditionalPanel("output.view_journey == 'show'",
@@ -60,22 +63,20 @@ ui <- fluidPage(
                                       choiceValues = JOURNEY_JUSTICE_MEASURE_LIST),
                    checkboxGroupInput("other_journey_checkbox", "Other measures",
                                       choiceNames = JOURNEY_OTHER_MEASURE_LIST,
-                                      choiceValues = JOURNEY_OTHER_MEASURE_LIST)
+                                      choiceValues = JOURNEY_OTHER_MEASURE_LIST),
+                   hr()
                    ),
-  conditionalPanel("output.view_prepost == 'show'","viewing pre/post - controls not implemented yet"),
-  conditionalPanel("output.view_general == 'show'","viewing general - controls not implemented yet"),
-  
-  hr(),
+  conditionalPanel("output.view_prepost == 'show'","viewing pre/post - controls not implemented yet", hr()),
+  conditionalPanel("output.view_general == 'show'","viewing general - controls not implemented yet", hr()),
   
   textOutput("title"),
   
   hr(),
   
-  
   conditionalPanel(condition = "output.view_baby == 'show'","baby",
                    fluidRow(
                      column(3,"pre-output goes here"),
-                     column(6,"journey output goes here"),
+                     column(6,"journey output goes here", plotlyOutput("journey_baby")),
                      column(3,"post-output goes here")
                    ),
                    
@@ -84,7 +85,7 @@ ui <- fluidPage(
   conditionalPanel(condition = "output.view_mother == 'show'","mother",
                    fluidRow(
                      column(3,"pre-output goes here"),
-                     column(6,"journey output goes here"),
+                     column(6,"journey output goes here", plotlyOutput("journey_mother")),
                      column(3,"post-output goes here")
                    ),
                    
