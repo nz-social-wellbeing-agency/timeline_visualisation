@@ -123,7 +123,7 @@ journey_results <- read_xlsx("www/input data.xlsx", "journeys results")
 plot_timeline <- function(group_name, role, selected_measures){
   # stop if no measures
   if(length(selected_measures) == 0)
-    return(list(figure = NA, figure_height = NA))
+    return(list(figure = NULL, figure_height = NA))
   # trim to measures of interest
   df <- journey_results %>% 
     filter(group_name == !!enquo(group_name),
@@ -136,9 +136,11 @@ plot_timeline <- function(group_name, role, selected_measures){
     select(description, percent_with, period, indicator) %>%
     filter(indicator != 0) %>%
     mutate(period = as.numeric(period))
+  # calculate height
+  figure_height <- df %>% select(description) %>% distinct() %>% nrow()
   # stop if no measures
-  if(nrow(df) == 0)
-    return(list(figure = NA, figure_height = NA))
+  if(figure_height == 0)
+    return(list(figure = NULL, figure_height = NA))
   
   # add vertical height
   tmp <- data.frame(description = selected_measures, height = -(1:length(selected_measures)), stringsAsFactors = FALSE)
@@ -153,8 +155,6 @@ plot_timeline <- function(group_name, role, selected_measures){
            y_max = height + 0.5 + (0.5 - JOURNEY_LINE_MARGIN) * percent_with / 100,
            y_min_grey = height + 0.5 - (0.5 - JOURNEY_LINE_MARGIN),
            y_max_grey = height + 0.5 + (0.5 - JOURNEY_LINE_MARGIN))
-  # calculate height
-  figure_height <- df %>% select(description) %>% distinct() %>% nrow()
   
   # plot
   suppressWarnings(
