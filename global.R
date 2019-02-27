@@ -24,8 +24,13 @@ setwd('C:/NotBackedUp/shiny apps/timeline_visualisation')
 library(shiny)
 library(tidyverse)
 library(readxl)
+library(plotly)
+library(ggiraph)
 
 ## parameters ----
+JOURNEY_LINE_MARGIN <- 0.05
+
+## data parameters ----
 ROLE_LIST = c("baby", "mother", "father", "full sibling", "half sibling")
 GROUP_LIST = list("machine defined clusters" = c("cluster 1", 
                                                  "cluster 2", 
@@ -110,15 +115,70 @@ JOURNEY_SUPPLEMENTAL_BENEFIT_MEASURE_LIST = c("Accommodation Supplement",
 
 ## load data ----
 journey_results <- read_xlsx("www/input data.xlsx", "journeys results")
-
-# groups_list <- get_options(journey_results, "group_name", "group_type")
-# roles <- get_options(journey_results, "role")
-# measures_list <- get_options(journey_results, "description", "description_type")
-
-
 # histogram_results <- read_xlsx("www/input data.xlsx", "histogram results")
 # total_results <- read_xlsx("www/input data.xlsx", "totals results")
 
+## supporting functions ----
+
+plot_timeline <- function(group_name, role, selected_measures){
+  # stop if no measures
+  if(length(selected_measures) == 0)
+    return(list(figure = NA, figure_height = NA))
+  # trim to measures of interest
+  df <- journey_results %>% 
+    filter(group_name == !!enquo(group_name),
+           role == !!enquo(role),
+           description %in% !!enquo(selected_measures)) %>%
+    mutate(percent_with = 100* round(num_contributing_indiv / group_size,3)) %>%
+    gather(key = "period", value = "indicator", `-20`, `-19`, `-18`, `-17`, `-16`, `-15`, `-14`, `-13`, `-12`,
+           `-11`, `-10`, `-9`, `-8`, `-7`, `-6`, `-5`, `-4`, `-3`, `-2`, `-1`, `1`, `2`, `3`, `4`, `5`, `6`, 
+           `7`, `8`, `9`, `10`, `11`, `12`, `13`) %>%
+    select(description, percent_with, period, indicator) %>%
+    filter(indicator != 0) %>%
+    mutate(period = as.numeric(period))
+  # stop if no measures
+  if(nrow(df) == 0)
+    return(list(figure = NA, figure_height = NA))
+  
+  # add vertical height
+  tmp <- data.frame(description = selected_measures, height = -(1:length(selected_measures)), stringsAsFactors = FALSE)
+  df <- df %>%
+    inner_join(tmp, by = 'description')
+  
+  # set rectangle limits
+  df <- df %>%
+    mutate(x_min = ifelse(sign(period) == -1, period, period - 1),
+           x_max = ifelse(sign(period) == -1, period + 1, period),
+           y_min = height + 0.5 - (0.5 - JOURNEY_LINE_MARGIN) * percent_with / 100,
+           y_max = height + 0.5 + (0.5 - JOURNEY_LINE_MARGIN) * percent_with / 100,
+           y_min_grey = height + 0.5 - (0.5 - JOURNEY_LINE_MARGIN),
+           y_max_grey = height + 0.5 + (0.5 - JOURNEY_LINE_MARGIN))
+  # calculate height
+  figure_height <- df %>% select(description) %>% distinct() %>% nrow()
+  
+  # plot
+  suppressWarnings(
+    p <- ggplot(data = df) +
+      geom_rect(aes(xmin = x_min, xmax = x_max, ymin = y_min_grey, ymax = y_max_grey), fill = 'grey', text = NULL) +
+      geom_rect(aes(xmin = x_min, xmax = x_max, ymin = y_min, ymax = y_max, fill = description,
+                    text = paste("Measure: ",description,
+                                 "<br>Time (fortnight): ", period,
+                                 "<br> Percentage of group with this measure: ",percent_with
+                    )))
+  )
+  
+  p <- p  +
+    theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+    geom_vline(xintercept = 0, colour = 'yellow', linetype = 'dashed') +
+    xlab('Time from birth (fortnights)') +
+    xlim(-20,13) #+
+    # coord_fixed(ratio = 33 / 8)
+  p <- ggplotly(p, tooltip = "text") %>%
+    layout(yaxis = list(scaleanchor = "x", scaleratio = 33 / 8, domain = c(0, -figure_height)),
+           xaxis = list(domain = c(-20,13)))
+  # return
+  return(list(figure = p, figure_height = figure_height))
+}
 
 
 
