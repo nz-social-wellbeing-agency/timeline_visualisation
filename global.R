@@ -15,17 +15,20 @@
 #
 # History (reverse order): 
 # 2019 Feb 25 SA v0
+# 2019 Mar 06 AK v0.1
 # ================================================================================================ #
 
 # to support development
-setwd('C:/NotBackedUp/shiny apps/timeline_visualisation')
+# setwd('C:/NotBackedUp/shiny apps/timeline_visualisation')
 
 ## required packages ----
 library(shiny)
+library(shinyWidgets)
 library(tidyverse)
 library(readxl)
 library(plotly)
 library(ggiraph)
+library(purrr)
 
 ## parameters ----
 JOURNEY_LINE_MARGIN <- 0.05

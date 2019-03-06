@@ -5,7 +5,7 @@
 #
 # Output:
 #
-# Author: Simon Anastasiadis
+# Author: Simon Anastasiadis, Akilesh Chokkanathapuram
 #
 # Dependencies: corresponding ui and global files
 #
@@ -15,10 +15,83 @@
 #
 # History (reverse order): 
 # 2019 Feb 25 SA v0
+# 2019 Mar 06 AK v0.1
 # ================================================================================================ #
 
 # Define server logic ----
 server <- function(input, output, session) {
+  if (identical(list.files(pattern = "\\.RDS$"), character(0))){
+    savedSessionFiles <- ""  
+  }else{
+    savedSessionFiles <- list.files(pattern = "\\.RDS$")
+  }
+  
+  observeEvent(input$load_inputs,{
+            
+            file <- input$loadFileSelection #select the file from the dropdown list box 
+            savedInputs <- readRDS(file) #read the input RDS fileinto the system for processing
+            inputIDs      <- names(savedInputs) # input ID names
+            inputvalues   <- unlist(savedInputs) # input ID values
+           
+            #running a loop to match the content to the relevant ID's
+            for (i in 1:length(inputIDs)) {
+              
+              #All components except checkboxes are matched here
+              session$sendInputMessage(inputIDs[i],  list(value=inputvalues[[i]]))
+              
+              #checkbox matching begins here
+              #Create a manual list of checkbox names
+              check.box.names <- c("role_checkbox",
+                                   "health_journey_checkbox",
+                                   "employment_journey_checkbox",
+                                   "mainbenefit_journey_checkbox",
+                                   "supportbenefit_journey_checkbox",
+                                   "education_journey_checkbox",
+                                   "justice_journey_checkbox",
+                                   "other_journey_checkbox")
+              
+              #dummy dataframe to store values
+              check.box.data.frame.loader <- data.frame(matrix(NA, nrow = 1, ncol = length(check.box.names)))
+              colnames(check.box.data.frame.loader) <- check.box.names
+              
+              #identify content from the saved data and segregate it for easier loading
+              #ACHOKKANATHAPURAM
+              for (i in 1:length(check.box.names)){
+                pattern.check <- check.box.names[i]
+                check.box.name.choices.checked <- grepl(pattern.check, substr(names(inputvalues), 0, (nchar(names(inputvalues))-1)))
+                items.to.load <- which(check.box.name.choices.checked == TRUE)
+                loader.buffer <- list(inputvalues[items.to.load])
+                loader.buffer <- list(unlist(loader.buffer, use.names = FALSE))
+                # print(loader.buffer)
+                check.box.data.frame.loader[[i]] <- loader.buffer
+              }
+            }
+            
+            #run the segregated content through a loop to load them into the shiny UI
+            for(i in 1:ncol(check.box.data.frame.loader)) {
+              check.box.to.update <- colnames(check.box.data.frame.loader)[i]
+              updateCheckboxGroupInput(
+                session = session,
+                inputId = check.box.to.update,
+                choices = NULL,
+                label = NULL,
+                selected = unlist(check.box.data.frame.loader[, i], use.names = F)
+              )
+              
+            }
+            
+            
+        })
+
+  observeEvent(input$save_inputs,{
+    saveRDS(reactiveValuesToList(input,all.names = T) , file = paste0(input$StateName, '.RDS'))
+    savedSessionFiles <- list.files(pattern = "\\.RDS$")
+    updateSelectInput(session = session, inputId = "loadFileSelection", choices = savedSessionFiles)
+  })
+
+
+  updateSelectInput(session = session, inputId = "loadFileSelection", choices = savedSessionFiles)
+  
   ## control panels conditional display ----
   #### setup ----
   panel_control <- reactiveValues()
@@ -150,19 +223,26 @@ server <- function(input, output, session) {
   #### update journey ----
   update_journey <- function(){
     
-    selected_measures <- c(input$health_journey_checkbox,
-                           input$employment_journey_checkbox, 
-                           input$mainbenefit_journey_checkbox,
-                           input$supportbenefit_journey_checkbox,
-                           input$education_journey_checkbox,
-                           input$justice_journey_checkbox,
-                           input$other_journey_checkbox)
+    selected_measures <- c(sapply(JOURNEY_HEALTH_MEASURE_LIST, function(x) ifelse(input[[x]], x, NA)),
+                           sapply(JOURNEY_EMPLOYMENT_MEASURE_LIST, function(x) ifelse(input[[x]], x, NA)),
+                           sapply(JOURNEY_MAINBENEFIT_MEASURE_LIST, function(x) ifelse(input[[x]], x, NA)),
+                           sapply(JOURNEY_SUPPLEMENTAL_BENEFIT_MEASURE_LIST, function(x) ifelse(input[[x]], x, NA)),
+                           sapply(JOURNEY_EDUCATION_MEASURE_LIST, function(x) ifelse(input[[x]], x, NA)),
+                           sapply(JOURNEY_JUSTICE_MEASURE_LIST, function(x) ifelse(input[[x]], x, NA)),
+                           sapply(JOURNEY_OTHER_MEASURE_LIST, function(x) ifelse(input[[x]], x, NA)))
+      # input$health_journey_checkbox,
+                           # input$employment_journey_checkbox, 
+                           # input$mainbenefit_journey_checkbox,
+                           # input$supportbenefit_journey_checkbox,
+                           # input$education_journey_checkbox,
+                           # input$justice_journey_checkbox,
+                           # input$other_journey_checkbox)
     
     if('baby' %in% input$role_checkbox)
       visualisation_parts$baby_journey <- plot_timeline(input$group_selectInput , 'baby', selected_measures)
     if('mother' %in% input$role_checkbox)
       visualisation_parts$mother_journey <- plot_timeline(input$group_selectInput , 'mother', selected_measures)
-
+    
     
   }
   
