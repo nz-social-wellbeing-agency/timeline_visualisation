@@ -19,59 +19,69 @@
 # ================================================================================================ #
 
 # to support development
-# setwd('C:/NotBackedUp/shiny apps/timeline_visualisation')
+setwd('C:/NotBackedUp/shiny apps/timeline_visualisation')
 
 ## required packages ----
 library(shiny)
 library(shinyWidgets)
 library(tidyverse)
-library(readxl)
 library(plotly)
-library(ggiraph)
-library(purrr)
 
 ## parameters ----
 JOURNEY_LINE_MARGIN <- 0.05
 
+
+## data load ----
+data_control_file <- "./www/data_controls.xlsx"
+input_data_file <- "./www/input_data.xlsx"
+
+group_controls <- read_excel(data_control_file, sheet = "GROUP")
+role_controls <- read_excel(data_control_file, sheet = "ROLE")
+description_controls <- read_excel(data_control_file, sheet = "DESCRIPTION")
+
+journey_data <- read_excel(input_data_file, sheet = "JOURNEY")
+totals_data <- read_excel(input_data_file, sheet = "TOTALS")
+categorical_data <- read_excel(input_data_file, sheet = "CATEGORICAL")
+
+## data intermediaries ----
+
+# named list of groups
+group_list <- group_controls %>%
+  select(group_display_type, type_display_order) %>%
+  distinct() %>%
+  arrange(type_display_order)
+
+group_list <- sapply(group_list$group_display_type, USE.NAMES = TRUE,
+                     FUN = function(x){
+                       tmp <- group_controls %>%
+                         filter(group_display_type == x) %>%
+                         arrange(group_display_order)
+                       return(tmp$group_display_name)
+                     })
+  
+# vector of roles
+role_list <- role_controls %>%
+  arrange(role_display_order)
+role_list <- role_list$role_display_name
+
+# named list of journey descriptors
+journey_description_list <- description_controls %>%
+  semi_join(journey_data, by = c("source", "description")) %>%
+  select(description_display_type, type_display_order) %>%
+  distinct() %>%
+  arrange(type_display_order)
+
+journey_description_list <- sapply(journey_description_list$description_display_type, USE.NAMES = TRUE,
+                                   FUN = function(x){
+                                     tmp <- description_controls %>%
+                                       filter(description_display_type == x) %>%
+                                       semi_join(journey_data, by = c("source", "description")) %>%
+                                       arrange(description_display_order)
+                                     return(tmp$description_display_name)
+                                   })
+
 ## data parameters ----
-ROLE_LIST = c("baby", "mother", "father", "full sibling", "half sibling")
-GROUP_LIST = list("machine defined clusters" = c("cluster 1", 
-                                                 "cluster 2", 
-                                                 "cluster 3", 
-                                                 "cluster 4", 
-                                                 "cluster 5", 
-                                                 "cluster 6", 
-                                                 "cluster 7", 
-                                                 "cluster 8", 
-                                                 "cluster 9", 
-                                                 "cluster 10", 
-                                                 "cluster 11", 
-                                                 "cluster 12"),
-                  "ethnic group" = c("asian ethnicity", 
-                                     "european ethnicity", 
-                                     "maori ethnicity", 
-                                     "other ethnicity", 
-                                     "pacific ethnicity"),
-                  "health" = c("any part of B4SC declined", 
-                               "any part of B4SC identified need", 
-                               "parents experience a chronic condition"),
-                  "life stage" = c("a parent is a recent migrant", 
-                                   "mother is older at time of birth", 
-                                   "mother is teen age at time of birth"),
-                  "mental health, addictions and justice" = c("attends alcohol/drug program", 
-                                                              "concern that mother smoked during pregnancy", 
-                                                              "either parent has had a corrections sentence", 
-                                                              "mother attends maternal mental health program"),
-                  "pregnancy" = c("birth weight of baby is low", 
-                                  "first pregnancy for the mother", 
-                                  "hard birth for mother", 
-                                  "hard for mother to carry to term", 
-                                  "hard pregnancy for mother"),
-                  "qualification" = c("certificate qualificiation", 
-                                      "graduate qualificiation", 
-                                      "no qualificiation", 
-                                      "postgrad qualificiation")
-)
+
 JOURNEY_EDUCATION_MEASURE_LIST = c("enrolled tertiary education", 
                                    "enrolled industry training", 
                                    "enrolled targeted training", 
@@ -116,10 +126,6 @@ JOURNEY_SUPPLEMENTAL_BENEFIT_MEASURE_LIST = c("Accommodation Supplement",
 
 
 
-## load data ----
-journey_results <- read_xlsx("www/input data.xlsx", "journeys results")
-# histogram_results <- read_xlsx("www/input data.xlsx", "histogram results")
-# total_results <- read_xlsx("www/input data.xlsx", "totals results")
 
 ## supporting functions ----
 
