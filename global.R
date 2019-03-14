@@ -246,17 +246,90 @@ plot_pre_post_figure <- function(df, position, value_type){
 
 
 ## plot general functions ----
-plot_general <- function(group_name, role, selected_measures){
+plot_general <- function(group_name, selected_measures){
   # stop if no measures
   if(length(selected_measures) == 0)
-    return(list(figure_pre = NULL, figure_post = NULL))
+    return(NULL)
   
-  # TO DO
-  # TO DO
-  # TO DO
-  # TO DO
-  # TO DO
+  # trim to measures of interest
+  df_totals <- totals_data %>%
+    filter(substring(position, 1, nchar("general")) == "general") %>%
+    left_join(role_controls, by = "role") %>%
+    left_join(group_controls, by = "group_name") %>%
+    filter(group_display_name == !!enquo(group_name)) %>%
+    left_join(description_controls, by = c("source", "description")) %>%
+    filter(description_display_name %in% !!enquo(selected_measures)) %>%
+    mutate(display_value = value / group_size)
   
+  totals_measures <- df_totals %>%
+    select(value_type) %>%
+    distinct() %>%
+    unlist(use.names = FALSE)
+  
+  df_categorical <- categorical_data %>%
+    filter(substring(position, 1, nchar("general")) == "general") %>%
+    left_join(role_controls, by = "role") %>%
+    left_join(group_controls, by = "group_name") %>%
+    filter(group_display_name == !!enquo(group_name)) %>%
+    left_join(description_controls, by = c("source", "description")) %>%
+    filter(description_display_name %in% !!enquo(selected_measures)) %>%
+    mutate(display_value = value / group_size)
+  
+  categorical_measures <- df_categorical %>%
+    select(description) %>%
+    distinct() %>%
+    unlist(use.names = FALSE)
+  
+  plot_totals_list <- lapply(totals_measures, function(x){ plot_general_figure(df_totals, x) })
+  plot_categorical_list <- lapply(categorical_measures, function(x){ plot_categorical_figure(df_categorical, x) })
+
+  return(c(plot_totals_list, plot_categorical_list))
+}  
+  
+# supporting function to produce the actual plots
+# allowing for mutiple types of general plots
+plot_general_figure <- function(df, measure){
+  # filter
+  df <- df %>%
+    filter(value_type == !!enquo(measure)) %>%
+    mutate(tmp_display_order = 10000 * type_display_order + description_display_order) %>%
+    select(value_display_name, display_value, description_display_name, description_display_colour,
+           role_display_name, tmp_display_order)
+  
+  # plot
+  p <- ggplot(data = df) +
+    geom_col(aes(x = description_display_name, y = display_value, fill = description_display_name)) +
+    facet_grid(cols = vars(role_display_name)) +
+    theme(axis.text.x = element_blank(), legend.position = "none") +
+    ylab(df$value_display_name[1]) +
+    xlab(df$description_display_name[1]) +
+    scale_fill_manual(values = with(df, setNames(description_display_colour, description_display_name)))
+  
+  return(p)
 }
 
+# supporting function to produce the actual plots
+# allowing for mutiple types of general plots
+plot_categorical_figure <- function(df, measure){
+  # filter
+  df <- df %>%
+    filter(description == !!enquo(measure)) %>%
+    select(category, category_display_name, display_value, description_display_name, description_display_colour,
+           category_display_order, role_display_name)
+  # set factor order
+  df_factors <- df %>% select(category_display_name, category_display_order) %>% distinct()
+  df$category_display_name = factor(df$category_display_name,
+                                    levels = df_factors$category_display_name[order(df_factors$category_display_order)])
+  
+  # plot
+  p <- ggplot(data = df) +
+    geom_col(aes(x = category_display_name, y = display_value, fill = description_display_name)) +
+    facet_grid(cols = vars(role_display_name)) +
+    theme(legend.position = "none") +
+    ylab("Percent") +
+    xlab(df$description_display_name[[1]]) +
+    scale_fill_manual(values = with(df, setNames(description_display_colour, description_display_name)))
+  
+  return(p)
+}
 

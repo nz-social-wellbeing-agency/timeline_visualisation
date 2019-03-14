@@ -260,34 +260,24 @@ server <- function(input, output, session) {
   
   #### update general figures ----
   update_general <- function(){
-    
-    selected_measures <- lapply(names(pre_post_description_list),
+
+    selected_measures <- lapply(names(general_description_list),
                                 FUN = function(x){
-                                  input_checkboxgroup <- paste0("pre_post_",gsub(" ","_",x),"_checkbox")
+                                  input_checkboxgroup <- paste0("general_",gsub(" ","_",x),"_checkbox")
                                   return(input[[input_checkboxgroup]])
                                 })
     selected_measures <- unlist(selected_measures, use.names = FALSE)
     
-    if('baby' %in% input$role_checkbox)
-      visualisation_parts$baby_pre_post <- plot_pre_post(input$group_selectInput , 'baby', selected_measures)
-    if('mother' %in% input$role_checkbox)
-      visualisation_parts$mother_pre_post <- plot_pre_post(input$group_selectInput , 'mother', selected_measures)
-    
-    #
-    #
-    # NEED TO ADD ALL ROLES HERE
-    #
-    #
+    visualisation_parts$general <- plot_general(input$group_selectInput, selected_measures)
   }
-  
-  
+
   ## master update visualisation ----
   update_visualisation <- function(){
     update_title()
     update_panels()
     update_journey()
     update_pre_post()
-    # update_general()
+    update_general()
   }
   
   ## output ----
@@ -336,7 +326,26 @@ server <- function(input, output, session) {
   #
   
   #### output general ----
-  
+  output$general_ui <- renderUI({
+    req(visualisation_parts$general)
+    
+    for(ii in 1:length(visualisation_parts$general)){
+      local({
+        # Need local so that each item gets its own number. Without it, the value of i in the renderPlot() 
+        # will be the same across all instances, because of when the expression is evaluated.
+        this_i <- ii
+        tmp_name <- paste0("general_",this_i)
+        output[[tmp_name]] <- renderPlot( visualisation_parts$general[[this_i]] )
+      })
+    }
+    
+    plot_output_list <- lapply(1:length(visualisation_parts$general), function(x){
+      tmp_name <- paste0("general_",x)
+      plotOutput(tmp_name)
+    })
+    # Convert the list to a tagList - this is necessary for the list of items to display properly.
+    do.call(tagList, plot_output_list)
+  })
   
   ## other ----
   

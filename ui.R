@@ -145,7 +145,11 @@ ui <- fluidPage(
                                 column(3, "post-output goes here")
                               ),
                               hr()
-             )
+             ),
+             
+             "general results go here",
+             uiOutput("general_ui")
+             
     ),
     ## tab: bookmarking ----
     tabPanel("Bookmarking",
