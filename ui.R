@@ -1,4 +1,4 @@
-#################################################################### 
+#' ================================================================================================ #
 #' Description: R Shiny user interface 
 #' 
 #' Input: 
@@ -14,9 +14,10 @@
 #' Issues: 
 #' 
 #' History (reverse order):
+#' 2019 Mar 15 SA first complete prototype, core dashboard functionality complete
+#' 2019 Mar 06 AK v0.1 addition of save/load functionality
 #' 2019 Feb 25 SA v0 
-#' 2019 Mar 06 AK v0.1
-#################################################################### 
+#' ================================================================================================ #
 
 ## Define UI
 
@@ -47,7 +48,7 @@ ui <- fluidPage(
              ),
              
              conditionalPanel(condition = "output.view_role == 'show'",
-                              checkboxGroupInput("role_checkbox", "Select roles to display",
+                              checkboxGroupInput("role_checkbox", h4("Select roles to display"),
                                                  choiceNames = role_list, choiceValues = role_list
                               ),
                               hr()
@@ -55,7 +56,7 @@ ui <- fluidPage(
              
              
              conditionalPanel(condition = "output.view_journey == 'show'",
-                              h2("Select measures to appear on the journey"),
+                              h4("Select measures to appear on the journey"),
                               
                               lapply(names(journey_description_list),
                                      FUN = function(x){
@@ -64,12 +65,11 @@ ui <- fluidPage(
                                                                  choiceNames = journey_description_list[[x]],
                                                                  choiceValues = journey_description_list[[x]]))
                                      }),
-                              
                               hr()
              ),
              
              conditionalPanel(condition = "output.view_prepost == 'show'",
-                              h2("Select measures to appear pre & post the journey"),
+                              h4("Select measures to appear pre & post the journey"),
                               
                               lapply(names(pre_post_description_list),
                                      FUN = function(x){
@@ -78,12 +78,11 @@ ui <- fluidPage(
                                                                  choiceNames = pre_post_description_list[[x]],
                                                                  choiceValues = pre_post_description_list[[x]]))
                                      }),
-                              
                               hr()
              ),
              
              conditionalPanel(condition = "output.view_general == 'show'",
-                              h2("Select the general measures to appear below the journey"),
+                              h4("Select the general measures to appear below the journey"),
                               
                               lapply(names(general_description_list),
                                      FUN = function(x){
@@ -92,62 +91,25 @@ ui <- fluidPage(
                                                                  choiceNames = general_description_list[[x]],
                                                                  choiceValues = general_description_list[[x]]))
                                      }),
-                              # "viewing general - controls not implemented yet",
                               hr()
              ),
              
              #### results ----
              textOutput("title"),
-             
              hr(),
              
-             conditionalPanel(condition = "output.view_baby == 'show'", "baby",
-                              fluidRow(
-                                column(3, "pre-output goes here"),
-                                column(6, "journey output goes here",
-                                       uiOutput("journey_baby_ui")),
-                                column(3, "post-output goes here")
-                              ),
-                              hr()
-             ),
+             lapply(role_list, FUN = function(role){
+               
+               conditionalPanel(condition = paste0("output.view_",gsub(" ","_",role),"== 'show'"), h3(role),
+                                fluidRow(
+                                  column(3, uiOutput(paste0("pre_",gsub(" ","_",role),"_ui"))),
+                                  column(6, uiOutput(paste0("journey_",gsub(" ","_",role),"_ui"))),
+                                  column(3, uiOutput(paste0("post_",gsub(" ","_",role),"_ui")))
+                                ),
+                                hr()
+               )
+             }),
              
-             conditionalPanel(condition = "output.view_mother == 'show'", "mother",
-                              fluidRow(
-                                column(3, "pre-output goes here",
-                                       uiOutput("pre_mother_ui")),
-                                column(6, "journey output goes here",
-                                       plotOutput("journey_mother")),
-                                column(3, "post-output goes here")
-                              ),
-                              hr()
-             ),
-             
-             conditionalPanel(condition = "output.view_father == 'show'", "father",
-                              fluidRow(
-                                column(3, "pre-output goes here"),
-                                column(6, "journey output goes here"),
-                                column(3, "post-output goes here")
-                              ), hr()),
-             
-             conditionalPanel(condition = "output.view_full_sib == 'show'", "full sibling",
-                              fluidRow(
-                                column(3, "pre-output goes here"),
-                                column(6, "journey output goes here"),
-                                column(3 , "post-output goes here")
-                              ),
-                              hr()
-             ),
-             
-             conditionalPanel(condition = "output.view_half_sib == 'show'", "half sibling",
-                              fluidRow(
-                                column(3, "pre-output goes here"),
-                                column(6, "journey output goes here"),
-                                column(3, "post-output goes here")
-                              ),
-                              hr()
-             ),
-             
-             "general results go here",
              uiOutput("general_ui")
              
     ),
@@ -177,5 +139,4 @@ ui <- fluidPage(
              ))
     ## end of tab wrapper ----
   )
-  
 )

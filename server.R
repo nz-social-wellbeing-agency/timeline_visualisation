@@ -1,27 +1,28 @@
-# ================================================================================================ #
-# Description: R Shiny calculation server
-#
-# Input:
-#
-# Output:
-#
-# Author: Simon Anastasiadis, Akilesh Chokkanathapuram
-#
-# Dependencies: corresponding ui and global files
-#
-# Notes:
-#
-# Issues:
-#
-# History (reverse order): 
-# 2019 Feb 25 SA v0
-# 2019 Mar 06 AK v0.1
-# ================================================================================================ #
+#' ================================================================================================ #
+#' Description: R Shiny calculation server
+#'
+#' Input:
+#'
+#' Output:
+#'
+#' Author: Simon Anastasiadis, Akilesh Chokkanathapuram
+#'
+#' Dependencies: corresponding ui and global files
+#'
+#' Notes: The use of 'for loops' requires a local environment. See the reference file details/training.
+#'
+#' Issues:
+#'
+#' History (reverse order): 
+#' 2019 Mar 15 SA first complete prototype, core dashboard functionality complete
+#' 2019 Mar 06 AK v0.1 addition of save/load functionality
+#' 2019 Feb 25 SA v0
+#' ================================================================================================ #
 
 # Define server logic ----
 server <- function(input, output, session) {
   
-  ## load/save observers ----
+  ## load/save observers --------------------------------------------------------------------------
   #### initial load of saved files ----
   if (identical(list.files(pattern = "\\.RDS$"), character(0))){
     savedSessionFiles <- ""  
@@ -86,110 +87,68 @@ server <- function(input, output, session) {
     updateSelectInput(session = session, inputId = "loadFileSelection", choices = savedSessionFiles)
   })
   
-  ## control panels conditional display ----
+  ## control panels conditional display -----------------------------------------------------------
   #### setup ----
   panel_control <- reactiveValues()
-  # control panels
-  panel_control$view_reset <- FALSE
-  panel_control$view_role <- FALSE
-  panel_control$view_journey <- FALSE
-  panel_control$view_prepost <- FALSE
-  panel_control$view_general <- FALSE
-  # role panels
-  panel_control$view_baby <- FALSE
-  panel_control$view_mother <- FALSE
-  panel_control$view_father <- FALSE
-  panel_control$view_full_sib <- FALSE
-  panel_control$view_half_sib <- FALSE
   
-  #### reactives ----
-  output$view_reset <- renderText(ifelse(panel_control$view_reset,"show","noshow"))
-  output$view_role <- renderText(ifelse(panel_control$view_role,"show","noshow"))
-  output$view_journey <- renderText(ifelse(panel_control$view_journey,"show","noshow"))
-  output$view_prepost <- renderText(ifelse(panel_control$view_prepost,"show","noshow"))
-  output$view_general <- renderText(ifelse(panel_control$view_general,"show","noshow"))
-  output$view_baby <- renderText(ifelse(panel_control$view_baby,"show","noshow"))
-  output$view_mother <- renderText(ifelse(panel_control$view_mother,"show","noshow"))
-  output$view_father <- renderText(ifelse(panel_control$view_father,"show","noshow"))
-  output$view_full_sib <- renderText(ifelse(panel_control$view_full_sib,"show","noshow"))
-  output$view_half_sib <- renderText(ifelse(panel_control$view_half_sib,"show","noshow"))
-  outputOptions(output, "view_reset", suspendWhenHidden = FALSE) # needed for conditional panel
-  outputOptions(output, "view_role", suspendWhenHidden = FALSE) # needed for conditional panel
-  outputOptions(output, "view_journey", suspendWhenHidden = FALSE) # needed for conditional panel
-  outputOptions(output, "view_prepost", suspendWhenHidden = FALSE) # needed for conditional panel
-  outputOptions(output, "view_general", suspendWhenHidden = FALSE) # needed for conditional panel
-  outputOptions(output, "view_baby", suspendWhenHidden = FALSE) # needed for conditional panel
-  outputOptions(output, "view_mother", suspendWhenHidden = FALSE) # needed for conditional panel
-  outputOptions(output, "view_father", suspendWhenHidden = FALSE) # needed for conditional panel
-  outputOptions(output, "view_full_sib", suspendWhenHidden = FALSE) # needed for conditional panel
-  outputOptions(output, "view_half_sib", suspendWhenHidden = FALSE) # needed for conditional panel
+  # panel list
+  control_panel_logicals <- c("view_reset", "view_role", "view_journey", "view_prepost", "view_general")
+  role_panel_logicals <- sapply(role_list, function(x){ paste0("view_", gsub(" ","_",x)) }, USE.NAMES = FALSE)
+  
+  # setup each conditional panel:
+  # 1 - reactive logical for display/not
+  # 2 - text output for the panel condition
+  # 3 - set textout to always update
+  for(panel_logical in c(control_panel_logicals, role_panel_logicals)){
+    local({
+      p_l <- panel_logical
+      
+      panel_control[[p_l]] <- FALSE
+      output[[p_l]] <- renderText( ifelse(panel_control[[p_l]], "show", "noshow") )
+      # set text to always update so it can be used for conditional panel
+      outputOptions(output, p_l, suspendWhenHidden = FALSE)
+    })
+  }
   
   #### observers ----
   observeEvent(input$resetButton,{
-    # set logicals
-    panel_control$view_reset <- !panel_control$view_reset
-    panel_control$view_role <- FALSE
-    panel_control$view_journey <- FALSE
-    panel_control$view_prepost <- FALSE
-    panel_control$view_general <- FALSE
+    panel_control <- update_logicals(panel_control, toggle = "view_reset",
+                                     to_false = control_panel_logicals[control_panel_logicals != "view_reset"])
   })
   
   observeEvent(input$roleButton,{
-    # set logicals
-    panel_control$view_reset <- FALSE
-    panel_control$view_role <- !panel_control$view_role
-    panel_control$view_journey <- FALSE
-    panel_control$view_prepost <- FALSE
-    panel_control$view_general <- FALSE
+    panel_control <- update_logicals(panel_control, toggle = "view_role",
+                                     to_false = control_panel_logicals[control_panel_logicals != "view_role"])
   })
   
   observeEvent(input$journeyButton,{
-    # set logicals
-    panel_control$view_reset <- FALSE
-    panel_control$view_role <- FALSE
-    panel_control$view_journey <- !panel_control$view_journey
-    panel_control$view_prepost <- FALSE
-    panel_control$view_general <- FALSE
-    
+    panel_control <- update_logicals(panel_control, toggle = "view_journey",
+                                     to_false = control_panel_logicals[control_panel_logicals != "view_journey"])
   })
   
   observeEvent(input$prepostButton,{
-    # set logicals
-    panel_control$view_reset <- FALSE
-    panel_control$view_role <- FALSE
-    panel_control$view_journey <- FALSE
-    panel_control$view_prepost <- !panel_control$view_prepost
-    panel_control$view_general <- FALSE
+    panel_control <- update_logicals(panel_control, toggle = "view_prepost",
+                                     to_false = control_panel_logicals[control_panel_logicals != "view_prepost"])
   })
   
   observeEvent(input$generalButton,{
-    # set logicals
-    panel_control$view_reset <- FALSE
-    panel_control$view_role <- FALSE
-    panel_control$view_journey <- FALSE
-    panel_control$view_prepost <- FALSE
-    panel_control$view_general <- !panel_control$view_general
+    panel_control <- update_logicals(panel_control, toggle = "view_general",
+                                     to_false = control_panel_logicals[control_panel_logicals != "view_general"])
   })
   
   observeEvent(input$updateButton,{
-    # set logicals
-    panel_control$view_reset <- FALSE
-    panel_control$view_role <- FALSE
-    panel_control$view_journey <- FALSE
-    panel_control$view_prepost <- FALSE
-    panel_control$view_general <- FALSE
-    update_visualisation()
+    panel_control <- update_logicals(panel_control, to_false = control_panel_logicals)
+    update_title()
+    update_panels()
+    update_journey()
+    update_pre_post()
+    update_general()
   })
   
-  ## visualisation staging ----
+  ## visualisation staging ------------------------------------------------------------------------
   #### setup ----
-  visualisation_parts <- reactiveValues()
-  visualisation_parts$title <- "No group presently selected"
-  visualisation_parts$baby_journey <- NULL
-  visualisation_parts$mother_journey <- NULL
-  visualisation_parts$father_journey <- NULL
-  visualisation_parts$full_sib_journey <- NULL
-  visualisation_parts$half_sib_journey <- NULL
+  output_staging <- reactiveValues()
+  output_staging$title <- "No group presently selected"
   
   #### update title ----
   update_title <- function(){
@@ -199,147 +158,134 @@ server <- function(input, output, session) {
     size <- group_controls %>%
       filter(group_display_name == !!enquo(group_name)) %>%
       select(group_size) %>%
-      summarise(group_size = min(group_size))
-    size <- size[["group_size"]]
+      summarise(group_size = min(group_size)) %>%
+      unlist(use.names = FALSE)
     # update
-    visualisation_parts$title <- sprintf(paste0("Group: ",group_name,"\tSize: ",size," journeys"))
+    output_staging$title <- sprintf(paste0("Group: ",group_name,"\tSize: ",size," journeys"))
   }
   
   #### update panels ----
   update_panels <- function(){
-    panel_control$view_baby <- "baby" %in% input$role_checkbox
-    panel_control$view_mother <- "mother" %in% input$role_checkbox
-    panel_control$view_father <- "father" %in% input$role_checkbox
-    panel_control$view_full_sib <- "full sibling" %in% input$role_checkbox
-    panel_control$view_half_sib <- "half sibling" %in% input$role_checkbox
+    for(role in role_list){
+      local({
+        rr <- role
+        panel_control[[paste0("view_", gsub(" ","_",rr))]] <- rr %in% input$role_checkbox
+      })
+    }
   }
   
   #### update journey ----
   update_journey <- function(){
-    
-    selected_measures <- lapply(names(journey_description_list),
-           FUN = function(x){
-             input_checkboxgroup <- paste0("journey_",gsub(" ","_",x),"_checkbox")
-             return(input[[input_checkboxgroup]])
-           })
-    selected_measures <- unlist(selected_measures, use.names = FALSE)
-    
-    if('baby' %in% input$role_checkbox)
-      visualisation_parts$baby_journey <- plot_timeline(input$group_selectInput , 'baby', selected_measures)
-    if('mother' %in% input$role_checkbox)
-      visualisation_parts$mother_journey <- plot_timeline(input$group_selectInput , 'mother', selected_measures)
-    
-    #
-    #
-    # NEED TO ADD ALL ROLES HERE
-    #
-    #
+    selected_measures <- get_selected_measures(journey_description_list, input,
+                                               prefix = "journey_", suffix = "_checkbox")
+    # stage journey plots for each role
+    for(role in input$role_checkbox){
+      local({
+        rr <- role
+        rr_staging <- paste0(gsub(" ","_",rr), "_journey")
+        output_staging[[rr_staging]] <- plot_timeline(input$group_selectInput , rr, selected_measures)
+      })
+    }
   }
   
   #### update pre & post figures ----
   update_pre_post <- function(){
-    
-    selected_measures <- lapply(names(pre_post_description_list),
-                                FUN = function(x){
-                                  input_checkboxgroup <- paste0("pre_post_",gsub(" ","_",x),"_checkbox")
-                                  return(input[[input_checkboxgroup]])
-                                })
-    selected_measures <- unlist(selected_measures, use.names = FALSE)
-    
-    if('baby' %in% input$role_checkbox)
-      visualisation_parts$baby_pre_post <- plot_pre_post(input$group_selectInput , 'baby', selected_measures)
-    if('mother' %in% input$role_checkbox)
-      visualisation_parts$mother_pre_post <- plot_pre_post(input$group_selectInput , 'mother', selected_measures)
-    
-    #
-    #
-    # NEED TO ADD ALL ROLES HERE
-    #
-    #
+    selected_measures <- get_selected_measures(pre_post_description_list, input,
+                                               prefix = "pre_post_", suffix = "_checkbox")
+    # stage pre/post plots for each role
+    for(role in input$role_checkbox){
+      local({
+        rr <- role
+        rr_staging <- paste0(gsub(" ","_",rr), "_pre_post")
+        output_staging[[rr_staging]] <- plot_pre_post(input$group_selectInput , rr, selected_measures)
+      })
+    }
   }
   
   #### update general figures ----
   update_general <- function(){
+    selected_measures <- get_selected_measures(general_description_list, input,
+                                               prefix = "general_", suffix = "_checkbox")
 
-    selected_measures <- lapply(names(general_description_list),
-                                FUN = function(x){
-                                  input_checkboxgroup <- paste0("general_",gsub(" ","_",x),"_checkbox")
-                                  return(input[[input_checkboxgroup]])
-                                })
-    selected_measures <- unlist(selected_measures, use.names = FALSE)
-    
-    visualisation_parts$general <- plot_general(input$group_selectInput, selected_measures)
+    output_staging$general <- plot_general(input$group_selectInput, selected_measures)
   }
 
-  ## master update visualisation ----
-  update_visualisation <- function(){
-    update_title()
-    update_panels()
-    update_journey()
-    update_pre_post()
-    update_general()
-  }
-  
-  ## output ----
+  ## output ---------------------------------------------------------------------------------------
   #### output other ----
-  output$title <- renderText(visualisation_parts$title)
+  output$title <- renderText(output_staging$title)
   
   #### output journey ----
   # renderPlot needed for outputting plot, renderUI needed to make height dynamic
-  output$journey_baby <- renderPlot( visualisation_parts$baby_journey$figure )
-  output$journey_baby_ui <- renderUI({ 
-    req(visualisation_parts$baby_journey)
-    req(visualisation_parts$baby_journey$figure_height)
-    plotOutput("journey_baby",height = HEIGHT_PIXELS * (1 + visualisation_parts$baby_journey$figure_height))
-  })
-  
-  #
-  #
-  # THESE FIGURES NEED UPDATING TO MATCH BABY
-  #
-  #
-  output$journey_mother <- renderPlot( visualisation_parts$mother_journey )
-  output$journey_father <- renderPlot( visualisation_parts$journey_father )
-  output$journey_full_sib <- renderPlot( visualisation_parts$journey_full_sib )
-  output$journey_half_sib <- renderPlot( visualisation_parts$journey_half_sib )
+  for(role in role_list){
+    local({
+      rr <- role
+      rr_staging <- paste0(gsub(" ","_",rr), "_journey")
+      rr_plot <- paste0("journey_",gsub(" ","_",rr))
+      rr_ui <- paste0("journey_",gsub(" ","_",rr),"_ui")
+      
+      output[[rr_plot]] <- renderPlot( output_staging[[rr_staging]]$figure )
+      
+      output[[rr_ui]] <- renderUI({ 
+        req(output_staging[[rr_staging]]$figure_height)
+        plotOutput(rr_plot,height = HEIGHT_PIXELS * (1 + output_staging[[rr_staging]]$figure_height))
+      })
+    })
+  }
   
   #### output pre_post ----
-  output$pre_mother_1 <- renderPlot( visualisation_parts$mother_pre_post$pre[[1]] )
-  output$pre_mother_2 <- renderPlot( visualisation_parts$mother_pre_post$pre[[2]] )
-  output$pre_mother_3 <- renderPlot( visualisation_parts$mother_pre_post$pre[[3]] )
-  
-  output$pre_mother_ui <- renderUI({
-    req(visualisation_parts$mother_pre_post)
-    req(visualisation_parts$mother_pre_post$pre)
-    req(visualisation_parts$mother_pre_post$pre[[1]])
-    
-    lapply(1:length(visualisation_parts$mother_pre_post$pre),
-           function(x){ plotOutput(paste0("pre_mother_",x), height = 200) })
-  })
-  
-  #
-  #
-  # NEED TO COMPLETE POST FOR MOTHER
-  #
-  # AND DUPLICATE FOR EVERY OTHER ROLE
-  #
-  #
-  
+  for(role in role_list){
+    local({
+      rr <- role
+      rr_staging <- paste0(gsub(" ","_",rr), "_pre_post")
+      rr_pre_plot <- paste0("pre_",gsub(" ","_",rr))
+      rr_pre_ui <- paste0("pre_",gsub(" ","_",rr),"_ui")
+      rr_post_plot <- paste0("post_",gsub(" ","_",rr))
+      rr_post_ui <- paste0("post_",gsub(" ","_",rr),"_ui")
+
+      # plotters for the dynamic number of pre/post plots
+      for(ii in 1:MAX_PRE_POST_TYPES){
+        local({
+          this_i <- ii
+          tmp_pre <- paste0(rr_pre_plot,"_",this_i)
+          output[[tmp_pre]] <- renderPlot( output_staging[[rr_staging]]$pre[[this_i]])
+          tmp_post <- paste0(rr_post_plot,"_",this_i)
+          output[[tmp_post]] <- renderPlot( output_staging[[rr_staging]]$post[[this_i]])
+        })
+      }
+      
+      # UI components for the pre plots
+      output[[rr_pre_ui]] <- renderUI({
+        req(output_staging[[rr_staging]]$pre[[1]])
+        
+        lapply(1:length(output_staging[[rr_staging]]$pre),
+               function(ii){ plotOutput(paste0(rr_pre_plot,"_",ii), height = 200) })
+      })
+      
+      # UI components for the post plots
+      output[[rr_post_ui]] <- renderUI({
+        req(output_staging[[rr_staging]]$post[[1]])
+        
+        lapply(1:length(output_staging[[rr_staging]]$post),
+               function(ii){ plotOutput(paste0(rr_post_plot,"_",ii), height = 200) })
+      })
+    })
+  }
+
   #### output general ----
   output$general_ui <- renderUI({
-    req(visualisation_parts$general)
+    req(output_staging$general)
     
-    for(ii in 1:length(visualisation_parts$general)){
+    for(ii in 1:length(output_staging$general)){
       local({
         # Need local so that each item gets its own number. Without it, the value of i in the renderPlot() 
         # will be the same across all instances, because of when the expression is evaluated.
         this_i <- ii
         tmp_name <- paste0("general_",this_i)
-        output[[tmp_name]] <- renderPlot( visualisation_parts$general[[this_i]] )
+        output[[tmp_name]] <- renderPlot( output_staging$general[[this_i]] )
       })
     }
     
-    plot_output_list <- lapply(1:length(visualisation_parts$general), function(x){
+    plot_output_list <- lapply(1:length(output_staging$general), function(x){
       tmp_name <- paste0("general_",x)
       plotOutput(tmp_name)
     })
@@ -347,6 +293,6 @@ server <- function(input, output, session) {
     do.call(tagList, plot_output_list)
   })
   
-  ## other ----
+  ## other ----------------------------------------------------------------------------------------
   
 }

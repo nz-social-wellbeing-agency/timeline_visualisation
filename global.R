@@ -1,22 +1,23 @@
-# ================================================================================================ #
-# Description: R Shiny global setup scape
-#
-# Input:
-#
-# Output:
-#
-# Author: Simon Anastasiadis
-#
-# Dependencies: corresponding ui and server files
-#
-# Notes:
-#
-# Issues:
-#
-# History (reverse order): 
-# 2019 Feb 25 SA v0
-# 2019 Mar 06 AK v0.1
-# ================================================================================================ #
+#' ================================================================================================ #
+#' Description: R Shiny global setup scape
+#'
+#' Input:
+#'
+#' Output:
+#'
+#' Author: Simon Anastasiadis
+#'
+#' Dependencies: corresponding ui and server files
+#'
+#' Notes:
+#'
+#' Issues:
+#'
+#' History (reverse order): 
+#' 2019 Mar 15 SA first complete prototype, core dashboard functionality complete
+#' 2019 Mar 06 AK v0.1 addition of save/load functionality
+#' 2019 Feb 25 SA v0
+#' ================================================================================================ #
 
 # to support development
 setwd('C:/NotBackedUp/shiny apps/timeline_visualisation')
@@ -31,6 +32,7 @@ library(readxl)
 ## parameters ----
 JOURNEY_LINE_MARGIN <- 0.05
 HEIGHT_PIXELS <- 50
+MAX_PRE_POST_TYPES <- 3
 
 ## data load ----
 data_control_file <- "./www/data_controls.xlsx"
@@ -126,6 +128,28 @@ general_description_list <- sapply(general_list$description_display_type, USE.NA
                                         arrange(description_display_order)
                                       return(tmp$description_display_name)
                                     })
+
+## supporting functions ----
+
+update_logicals <- function(logical_list, to_false = NULL, to_true = NULL, toggle = NULL){
+  for(x in to_false)
+    logical_list[[x]] <- FALSE
+  for(x in to_true)
+    logical_list[[x]] <- FALSE
+  for(x in toggle)
+    logical_list[[x]] <- !logical_list[[x]]
+  return(logical_list)
+}
+
+get_selected_measures <- function(reference_list, input, prefix = NULL, suffix = NULL){
+  selected_measures <- lapply(names(reference_list),
+                              FUN = function(x){
+                                input_checkboxgroup <- paste0(prefix, gsub(" ","_",x), suffix)
+                                return(input[[input_checkboxgroup]])
+                              })
+  return(unlist(selected_measures, use.names = FALSE))
+}
+
 
 ## plot timeline function ----
 plot_timeline <- function(group_name, role, selected_measures){
