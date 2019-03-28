@@ -145,6 +145,39 @@ server <- function(input, output, session) {
     update_general()
   })
   
+  ## quick select buttons for journey -------------------------------------------------------------
+  #### observers ----
+  observeEvent(input$journey_all_buttom,{
+    for(x in names(journey_description_list)){
+      tmp_inputID <- paste0("journey_",gsub(" ","_",x),"_checkbox")
+      updateCheckboxGroupInput(session, tmp_inputID,
+                               selected = journey_description_list[[x]])
+    }
+  })
+  
+  observeEvent(input$journey_common_button,{
+    for(x in names(journey_description_list)){
+      tmp_inputID <- paste0("journey_",gsub(" ","_",x),"_checkbox")
+      
+      selection <- description_controls %>%
+        filter(description_display_type == !!enquo(x),
+               is_common_journey_element == 1) %>%
+        select(description_display_name) %>%
+        unlist(use.names = FALSE)
+      
+      updateCheckboxGroupInput(session, tmp_inputID,
+                               selected = selection)
+    }
+  })
+  
+  observeEvent(input$journey_none_button,{
+    for(x in names(journey_description_list)){
+      tmp_inputID <- paste0("journey_",gsub(" ","_",x),"_checkbox")
+      updateCheckboxGroupInput(session, tmp_inputID,
+                               selected = NA)
+    }
+  })
+
   ## visualisation staging ------------------------------------------------------------------------
   #### setup ----
   output_staging <- reactiveValues()
@@ -281,13 +314,13 @@ server <- function(input, output, session) {
         # will be the same across all instances, because of when the expression is evaluated.
         this_i <- ii
         tmp_name <- paste0("general_",this_i)
-        output[[tmp_name]] <- renderPlot( output_staging$general[[this_i]] )
+        output[[tmp_name]] <- renderPlot( output_staging$general[[this_i]], width = 500, height = 300 )
       })
     }
     
     plot_output_list <- lapply(1:length(output_staging$general), function(x){
       tmp_name <- paste0("general_",x)
-      plotOutput(tmp_name)
+      plotOutput(tmp_name, inline = TRUE)
     })
     # Convert the list to a tagList - this is necessary for the list of items to display properly.
     do.call(tagList, plot_output_list)

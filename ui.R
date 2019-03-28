@@ -58,6 +58,10 @@ ui <- fluidPage(
              conditionalPanel(condition = "output.view_journey == 'show'",
                               h4("Select measures to appear on the journey"),
                               
+                              actionButton("journey_all_buttom", "All"),
+                              actionButton("journey_common_button", "Common"),
+                              actionButton("journey_none_button", "None"),
+                              
                               lapply(names(journey_description_list),
                                      FUN = function(x){
                                        tmp_inputID <- paste0("journey_",gsub(" ","_",x),"_checkbox")
