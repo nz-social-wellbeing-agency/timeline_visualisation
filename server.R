@@ -147,7 +147,7 @@ server <- function(input, output, session) {
   
   ## quick select buttons for journey -------------------------------------------------------------
   #### observers ----
-  observeEvent(input$journey_all_buttom,{
+  observeEvent(input$journey_all_button,{
     for(x in names(journey_description_list)){
       tmp_inputID <- paste0("journey_",gsub(" ","_",x),"_checkbox")
       updateCheckboxGroupInput(session, tmp_inputID,

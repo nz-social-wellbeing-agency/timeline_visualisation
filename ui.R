@@ -58,7 +58,7 @@ ui <- fluidPage(
              conditionalPanel(condition = "output.view_journey == 'show'",
                               h4("Select measures to appear on the journey"),
                               
-                              actionButton("journey_all_buttom", "All"),
+                              actionButton("journey_all_button", "All"),
                               actionButton("journey_common_button", "Common"),
                               actionButton("journey_none_button", "None"),
                               
