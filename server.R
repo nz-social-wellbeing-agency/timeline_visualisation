@@ -280,12 +280,16 @@ server <- function(input, output, session) {
         local({
           this_i <- ii
           tmp_pre <- paste0(rr_pre_plot,"_",this_i)
-          output[[tmp_pre]] <- renderPlot( output_staging[[rr_staging]]$pre[[this_i]])
+          output[[tmp_pre]] <- renderPlot({ 
+            req(length(output_staging[[rr_staging]]$pre) >= this_i) # avoids error accessing unavailable subscripts
+            output_staging[[rr_staging]]$pre[[this_i]] })
           tmp_post <- paste0(rr_post_plot,"_",this_i)
-          output[[tmp_post]] <- renderPlot( output_staging[[rr_staging]]$post[[this_i]])
+          output[[tmp_post]] <- renderPlot({
+            req(length(output_staging[[rr_staging]]$post) >= this_i) # avoids error accessing unavailable subscripts
+            output_staging[[rr_staging]]$post[[this_i]] })
         })
       }
-      
+
       # UI components for the pre plots
       output[[rr_pre_ui]] <- renderUI({
         req(output_staging[[rr_staging]]$pre[[1]])
@@ -314,7 +318,9 @@ server <- function(input, output, session) {
         # will be the same across all instances, because of when the expression is evaluated.
         this_i <- ii
         tmp_name <- paste0("general_",this_i)
-        output[[tmp_name]] <- renderPlot( output_staging$general[[this_i]], width = 500, height = 300 )
+        output[[tmp_name]] <- renderPlot({
+          req(length(output_staging$general) >= this_i) # avoids error where attempts to plot more than available
+          output_staging$general[[this_i]] }, width = 500, height = 300 )
       })
     }
     
@@ -322,6 +328,10 @@ server <- function(input, output, session) {
       tmp_name <- paste0("general_",x)
       plotOutput(tmp_name, inline = TRUE)
     })
+    
+    # print(length(output_staging$general))
+    # print(length(plot_output_list))
+    
     # Convert the list to a tagList - this is necessary for the list of items to display properly.
     do.call(tagList, plot_output_list)
   })

@@ -260,7 +260,7 @@ plot_pre_post_figure <- function(df, position, value_type){
   
   # plot
   p <- ggplot(data = df) +
-    theme(axis.title.x = element_blank(), legend.position = "none", axis.text.x = element_text(angle = 15, hjust = 1)) +
+    theme(axis.title.x = element_blank(), legend.position = "none", axis.text.x = element_text(angle = 15, hjust = 0.75)) +
     geom_col(aes(x = description_display_name, y = display_value, fill = description_display_name)) +
     ylab(df$value_display_name[1]) +
     scale_fill_manual(values = with(df, setNames(description_display_colour, description_display_name)))
@@ -324,9 +324,9 @@ plot_general_figure <- function(df, measure){
   p <- ggplot(data = df) +
     geom_col(aes(x = description_display_name, y = display_value, fill = description_display_name)) +
     facet_grid(cols = vars(role_display_name)) +
-    theme(axis.text.x = element_blank(), legend.position = "none") +
+    theme(legend.position = "none", axis.text.x = element_text(angle = 15, hjust = 0.75)) +
     ylab(df$value_display_name[1]) +
-    xlab(df$description_display_name[1]) +
+    xlab("") +
     scale_fill_manual(values = with(df, setNames(description_display_colour, description_display_name)))
   
   return(p)
@@ -349,7 +349,7 @@ plot_categorical_figure <- function(df, measure){
   p <- ggplot(data = df) +
     geom_col(aes(x = category_display_name, y = display_value, fill = description_display_name)) +
     facet_grid(cols = vars(role_display_name)) +
-    theme(legend.position = "none") +
+    theme(legend.position = "none", axis.text.x = element_text(angle = 15, hjust = 0.75)) +
     ylab("Percent") +
     xlab(df$description_display_name[[1]]) +
     scale_fill_manual(values = with(df, setNames(description_display_colour, description_display_name)))
