@@ -380,7 +380,8 @@ plot_categorical_figure <- function(df, measure){
     theme(legend.position = "none") +
     ylab("Percent") +
     xlab(df$description_display_name[[1]]) +
-    scale_fill_manual(values = with(df, setNames(description_display_colour, description_display_name)))
+    scale_fill_manual(values = with(df, setNames(description_display_colour, description_display_name))) +
+    coord_flip()
   
   return(p)
 }
