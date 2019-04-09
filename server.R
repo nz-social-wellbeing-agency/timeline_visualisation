@@ -92,7 +92,7 @@ server <- function(input, output, session) {
   panel_control <- reactiveValues()
   
   # panel list
-  control_panel_logicals <- c("view_reset", "view_role", "view_journey", "view_prepost", "view_general")
+  control_panel_logicals <- c("view_group", "view_role", "view_journey", "view_prepost", "view_general")
   role_panel_logicals <- sapply(role_list, function(x){ paste0("view_", gsub(" ","_",x)) }, USE.NAMES = FALSE)
   
   # setup each conditional panel:
@@ -111,9 +111,9 @@ server <- function(input, output, session) {
   }
   
   #### observers ----
-  observeEvent(input$resetButton,{
-    panel_control <- update_logicals(panel_control, toggle = "view_reset",
-                                     to_false = control_panel_logicals[control_panel_logicals != "view_reset"])
+  observeEvent(input$groupButton,{
+    panel_control <- update_logicals(panel_control, toggle = "view_group",
+                                     to_false = control_panel_logicals[control_panel_logicals != "view_group"])
   })
   
   observeEvent(input$roleButton,{

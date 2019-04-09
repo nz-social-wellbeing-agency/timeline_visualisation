@@ -32,7 +32,7 @@ ui <- fluidPage(
              br(),
              
              #### buttons ----
-             actionButton("resetButton", "Reset"),
+             actionButton("groupButton", "Group"),
              actionButton("roleButton", "Role"),
              actionButton("journeyButton", "Journey"),
              actionButton("prepostButton", "Pre/Post"),
@@ -42,7 +42,7 @@ ui <- fluidPage(
              hr(),
              
              #### controls ----
-             conditionalPanel(condition = "output.view_reset == 'show'",
+             conditionalPanel(condition = "output.view_group == 'show'",
                               selectInput("group_selectInput", "Select group to investigate", choices = group_list),
                               hr()
              ),

@@ -159,6 +159,7 @@ plot_timeline <- function(group_name, role, selected_measures){
   
   # trim to measures of interest
   df <- journey_data %>% 
+    ungroup() %>%
     left_join(group_controls, by = "group_name") %>%
     filter(group_display_name == !!enquo(group_name)) %>%
     left_join(role_controls, by = "role") %>%
@@ -170,19 +171,26 @@ plot_timeline <- function(group_name, role, selected_measures){
     gather(key = "period", value = "indicator", `-20`, `-19`, `-18`, `-17`, `-16`, `-15`, `-14`, `-13`, `-12`,
            `-11`, `-10`, `-9`, `-8`, `-7`, `-6`, `-5`, `-4`, `-3`, `-2`, `-1`, `1`, `2`, `3`, `4`, `5`, `6`, 
            `7`, `8`, `9`, `10`, `11`, `12`, `13`) %>%
-    select(description_display_name, percent_with, plot_display_text, description_display_colour, period, indicator) %>%
+    select(description_display_name, percent_with, plot_display_text, description_display_colour,
+           type_display_order, description_display_order, period, indicator) %>%
     filter(indicator != 0) %>%
     mutate(period = as.numeric(period))
   # calculate height
-  figure_height <- df %>% select(description_display_name) %>% distinct() %>% nrow()
+  figure_height <- df %>% ungroup() %>% select(description_display_name) %>% distinct() %>% nrow()
   # stop if no measures
   if(figure_height == 0)
     return(list(figure = NULL, figure_height = NA))
-  
+
   # add vertical height
-  tmp <- data.frame(description_display_name = selected_measures,
-                    height = -(1:length(selected_measures)),
-                    stringsAsFactors = FALSE)
+  tmp <- df %>%
+    select(description_display_name, type_display_order, description_display_order) %>%
+    distinct() %>%
+    mutate(sort_order = 1000 * type_display_order + description_display_order) %>%
+    arrange(sort_order)
+  tmp <- tmp %>%
+    mutate(height = -(1:nrow(tmp)))
+  
+  
   df <- df %>%
     inner_join(tmp, by = 'description_display_name')
   
@@ -222,6 +230,7 @@ plot_pre_post <- function(group_name, role, selected_measures){
   
   # trim to measures of interest
   df <- totals_data %>%
+    ungroup() %>%
     filter(position %in% c("pre", "post")) %>%
     left_join(group_controls, by = "group_name") %>%
     filter(group_display_name == !!enquo(group_name)) %>%
@@ -258,12 +267,18 @@ plot_pre_post_figure <- function(df, position, value_type){
   df$description_display_name = factor(df$description_display_name,
                                        levels = df$description_display_name[order(df$tmp_display_order)])
   
+  # handle percentages
+  if(grepl("percent",df$value_display_name[1],ignore.case = TRUE))
+    df$display_value = 100 * df$display_value
+    
   # plot
   p <- ggplot(data = df) +
-    theme(axis.title.x = element_blank(), legend.position = "none", axis.text.x = element_text(angle = 15, hjust = 0.75)) +
     geom_col(aes(x = description_display_name, y = display_value, fill = description_display_name)) +
+    theme(legend.position = "none") +
     ylab(df$value_display_name[1]) +
-    scale_fill_manual(values = with(df, setNames(description_display_colour, description_display_name)))
+    xlab("") +
+    scale_fill_manual(values = with(df, setNames(description_display_colour, description_display_name))) +
+    coord_flip()
     
   return(p)
 }
@@ -277,6 +292,7 @@ plot_general <- function(group_name, selected_measures){
   
   # trim to measures of interest
   df_totals <- totals_data %>%
+    ungroup() %>%
     filter(substring(position, 1, nchar("general")) == "general") %>%
     left_join(role_controls, by = "role") %>%
     left_join(group_controls, by = "group_name") %>%
@@ -291,6 +307,7 @@ plot_general <- function(group_name, selected_measures){
     unlist(use.names = FALSE)
   
   df_categorical <- categorical_data %>%
+    ungroup() %>%
     filter(substring(position, 1, nchar("general")) == "general") %>%
     left_join(role_controls, by = "role") %>%
     left_join(group_controls, by = "group_name") %>%
@@ -298,6 +315,7 @@ plot_general <- function(group_name, selected_measures){
     left_join(description_controls, by = c("source", "description")) %>%
     filter(description_display_name %in% !!enquo(selected_measures)) %>%
     mutate(display_value = value / group_size)
+    
   
   categorical_measures <- df_categorical %>%
     select(description) %>%
@@ -315,19 +333,25 @@ plot_general <- function(group_name, selected_measures){
 plot_general_figure <- function(df, measure){
   # filter
   df <- df %>%
+    ungroup() %>%
     filter(value_type == !!enquo(measure)) %>%
     mutate(tmp_display_order = 10000 * type_display_order + description_display_order) %>%
     select(value_display_name, display_value, description_display_name, description_display_colour,
            role_display_name, tmp_display_order)
   
+  # handle percentages
+  if(grepl("percent",df$value_display_name[1],ignore.case = TRUE))
+    df$display_value = 100 * df$display_value
+  
   # plot
   p <- ggplot(data = df) +
     geom_col(aes(x = description_display_name, y = display_value, fill = description_display_name)) +
     facet_grid(cols = vars(role_display_name)) +
-    theme(legend.position = "none", axis.text.x = element_text(angle = 15, hjust = 0.75)) +
+    theme(legend.position = "none") +
     ylab(df$value_display_name[1]) +
     xlab("") +
-    scale_fill_manual(values = with(df, setNames(description_display_colour, description_display_name)))
+    scale_fill_manual(values = with(df, setNames(description_display_colour, description_display_name))) +
+    coord_flip()
   
   return(p)
 }
@@ -337,6 +361,7 @@ plot_general_figure <- function(df, measure){
 plot_categorical_figure <- function(df, measure){
   # filter
   df <- df %>%
+    ungroup() %>%
     filter(description == !!enquo(measure)) %>%
     select(category, category_display_name, display_value, description_display_name, description_display_colour,
            category_display_order, role_display_name)
@@ -345,11 +370,14 @@ plot_categorical_figure <- function(df, measure){
   df$category_display_name = factor(df$category_display_name,
                                     levels = df_factors$category_display_name[order(df_factors$category_display_order)])
   
+  # handle percentages
+  df$display_value = 100 * df$display_value
+  
   # plot
   p <- ggplot(data = df) +
     geom_col(aes(x = category_display_name, y = display_value, fill = description_display_name)) +
     facet_grid(cols = vars(role_display_name)) +
-    theme(legend.position = "none", axis.text.x = element_text(angle = 15, hjust = 0.75)) +
+    theme(legend.position = "none") +
     ylab("Percent") +
     xlab(df$description_display_name[[1]]) +
     scale_fill_manual(values = with(df, setNames(description_display_colour, description_display_name)))
