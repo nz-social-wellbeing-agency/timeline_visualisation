@@ -174,7 +174,7 @@ server <- function(input, output, session) {
     for(x in names(journey_description_list)){
       tmp_inputID <- paste0("journey_",gsub(" ","_",x),"_checkbox")
       updateCheckboxGroupInput(session, tmp_inputID,
-                               selected = NA)
+                               selected = character(0))
     }
   })
 

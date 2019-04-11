@@ -211,6 +211,7 @@ plot_timeline <- function(group_name, role, selected_measures){
     geom_text(aes(x = -20, y = height + 1 - JOURNEY_LINE_MARGIN, label = plot_display_text), hjust = 0)
   
   p <- p  +
+    theme_bw() +
     theme(axis.ticks.y = element_blank(), legend.position = "none") +
     scale_y_continuous(breaks = seq(0,-figure_height), minor_breaks = NULL,
                        name = NULL, labels = NULL, limits = c(-figure_height,0)) +
@@ -274,6 +275,7 @@ plot_pre_post_figure <- function(df, position, value_type){
   # plot
   p <- ggplot(data = df) +
     geom_col(aes(x = description_display_name, y = display_value, fill = description_display_name)) +
+    theme_bw() +
     theme(legend.position = "none") +
     ylab(df$value_display_name[1]) +
     xlab("") +
@@ -347,11 +349,12 @@ plot_general_figure <- function(df, measure){
   p <- ggplot(data = df) +
     geom_col(aes(x = description_display_name, y = display_value, fill = description_display_name)) +
     facet_grid(cols = vars(role_display_name)) +
+    theme_bw() +
     theme(legend.position = "none") +
     ylab(df$value_display_name[1]) +
     xlab("") +
     scale_fill_manual(values = with(df, setNames(description_display_colour, description_display_name))) +
-    coord_flip()
+    coord_flip() 
   
   return(p)
 }
@@ -377,6 +380,7 @@ plot_categorical_figure <- function(df, measure){
   p <- ggplot(data = df) +
     geom_col(aes(x = category_display_name, y = display_value, fill = description_display_name)) +
     facet_grid(cols = vars(role_display_name)) +
+    theme_bw() +
     theme(legend.position = "none") +
     ylab("Percent") +
     xlab(df$description_display_name[[1]]) +
