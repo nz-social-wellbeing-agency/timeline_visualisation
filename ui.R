@@ -99,7 +99,7 @@ ui <- fluidPage(
              ),
              
              #### results ----
-             textOutput("title"),
+             div(textOutput("title"), style = "font-size:170%"),
              hr(),
              
              lapply(role_list, FUN = function(role){
@@ -114,8 +114,39 @@ ui <- fluidPage(
                )
              }),
              
-             uiOutput("general_ui")
+             uiOutput("general_ui"),
              
+             #### IDI disclaimer ----
+             hr(),
+             
+             h6('IDI Disclaimer'),
+             
+             div(
+             p("The results in this data table are not official statistics, they have been created for research",
+               " purposes from the Integrated Data Infrastructure (IDI), managed by Statistics New Zealand.",
+               "The opinions, findings, recommendations, and conclusions expressed in this [report, paper etc]",
+               " are those of the author(s), not Statistics NZ, SIA, or MSD."),
+             
+             p("Access to the anonymised data used in this study was provided by Statistics NZ in accordance",
+               " with security and confidentiality provisions of the Statistics Act 1975. Only people authorised",
+               " by the Statistics Act 1975 are allowed to see data about a particular person, household, business,",
+               " or organisation, and the results in this data table have been confidentialised to protect these", 
+               " groups from identification."),
+             
+             p("Careful consideration has been given to the privacy, security, and confidentiality issues associated",
+               " with using administrative and survey data in the IDI. Further detail can be found in the Privacy",
+               " impact assessment for the Integrated Data Infrastructure available from www.stats.govt.nz."),
+             
+             p("The results are based in part on tax data supplied by Inland Revenue to Statistics NZ under the",
+               " Tax Administration Act 1994. This tax data must be used only for statistical purposes, and no",
+               " individual information may be published or disclosed in any other form, or provided to Inland Revenue",
+               " for administrative or regulatory purposes. Any person who has had access to the unit record data",
+               " has certified that they have been shown, have read, and have understood section 81 of the Tax",
+               " Administration Act 1994, which relates to secrecy. Any discussion of data limitations or weaknesses",
+               " is in the context of using the IDI for statistical purposes, and is not related to the data's ability",
+               " to support Inland Revenue's core operational requirements."),
+             style = "font-size:70%")
+
     ),
     ## tab: bookmarking ----
     tabPanel("Bookmarking",
