@@ -287,13 +287,17 @@ plot_pre_post <- function(group_name, role, selected_measures){
 plot_pre_post_figure <- function(df, position, value_type, max_display_value){
   # filter
   df <- df %>%
-    filter(position == !!enquo(position),
-           value_type == !!enquo(value_type)) %>%
+    filter(value_type == !!enquo(value_type)) %>%
     mutate(tmp_display_order = 10000 * type_display_order + description_display_order) %>%
-    select(value_display_name, display_value, description_display_name, description_display_colour, tmp_display_order)
+    select(value_display_name, display_value, description_display_name, description_display_colour, 
+           position, tmp_display_order)
   # set factor order
+  levels <- df %>%
+    select(description_display_name, tmp_display_order) %>%
+    distinct() %>%
+    arrange(tmp_display_order)
   df$description_display_name = factor(df$description_display_name,
-                                       levels = df$description_display_name[order(df$tmp_display_order)])
+                                       levels = levels$description_display_name)
   
   # handle percentages
   if(grepl("percent",df$value_display_name[1],ignore.case = TRUE))
@@ -301,13 +305,13 @@ plot_pre_post_figure <- function(df, position, value_type, max_display_value){
     
   # plot
   p <- ggplot(data = df) +
-    geom_col(aes(x = description_display_name, y = display_value, fill = description_display_name)) +
+    geom_col(aes(x = description_display_name, y = display_value, fill = position), position = "dodge") +
     theme_bw() +
-    theme(legend.position = "none") +
+    theme(legend.position = "top") +
     ylim(c(0,max_display_value)) +
     ylab(df$value_display_name[1]) +
     xlab("") +
-    scale_fill_manual(values = with(df, setNames(description_display_colour, description_display_name))) +
+    # scale_fill_manual(values = with(df, setNames(description_display_colour, description_display_name))) +
     coord_flip()
     
   return(p)

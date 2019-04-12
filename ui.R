@@ -113,10 +113,9 @@ ui <- fluidPage(
              lapply(role_list, FUN = function(role){
                
                conditionalPanel(condition = paste0("output.view_",gsub(" ","_",role),"== 'show'"), h3(role),
+                                uiOutput(paste0("journey_",gsub(" ","_",role),"_ui")),
                                 fluidRow(
-                                  column(3, uiOutput(paste0("pre_",gsub(" ","_",role),"_ui"))),
-                                  column(6, uiOutput(paste0("journey_",gsub(" ","_",role),"_ui"))),
-                                  column(3, uiOutput(paste0("post_",gsub(" ","_",role),"_ui")))
+                                  uiOutput(paste0("post_",gsub(" ","_",role),"_ui"))
                                 ),
                                 hr()
                )
