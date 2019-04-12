@@ -1,3 +1,7 @@
 .Rhistory
-www/~.xlsx
-www/~.xlsx
+www/~*.xlsx
+www/~*.xlsx
+www/~$*
+www/~$*
+
+
