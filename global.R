@@ -31,7 +31,7 @@ library(readxl)
 
 ## parameters ----
 JOURNEY_LINE_MARGIN <- 0.05
-HEIGHT_PIXELS <- 50
+HEIGHT_PIXELS <- 30
 MAX_PRE_POST_TYPES <- 3
 
 ## data load ----
@@ -307,7 +307,7 @@ plot_pre_post_figure <- function(df, position, value_type, max_display_value){
   p <- ggplot(data = df) +
     geom_col(aes(x = description_display_name, y = display_value, fill = position), position = "dodge") +
     theme_bw() +
-    theme(legend.position = "top") +
+    theme(legend.position = "top", legend.title = element_blank()) +
     ylim(c(0,max_display_value)) +
     ylab(df$value_display_name[1]) +
     xlab("") +

@@ -303,7 +303,7 @@ server <- function(input, output, session) {
         req(output_staging[[rr_staging]]$post[[1]])
         
         lapply(1:length(output_staging[[rr_staging]]$post),
-               function(ii){ column(4, plotOutput(paste0(rr_post_plot,"_",ii), height = 200)) })
+               function(ii){ column(4, plotOutput(paste0(rr_post_plot,"_",ii), height = 300)) })
       })
     })
   }
