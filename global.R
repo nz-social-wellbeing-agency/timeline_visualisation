@@ -105,11 +105,11 @@ pre_post_description_list <- sapply(pre_post_list$description_display_type, USE.
 # named list of general descriptors
 totals_measures <- totals_data %>%
   select("source", "description", "position") %>%
-  filter(position %in% c("general_post", "general_pre", "general", "general_percent")) %>%
+  filter(grepl("general", position, ignore.case = TRUE)) %>%
   distinct()
 categorical_measures <- categorical_data %>%
   select("source", "description", "position") %>%
-  filter(position %in% c("general_post", "general_pre", "general", "general_percent")) %>%
+  filter(grepl("general", position, ignore.case = TRUE)) %>%
   distinct()
 general_measures <- rbind(totals_measures, categorical_measures) %>%
   distinct()
@@ -173,7 +173,6 @@ max_display_value <- function(value_type, position, selected_measures){
     
   return(max_value)
 }
-
 
 ## plot timeline function ----
 plot_timeline <- function(group_name, role, selected_measures){
@@ -324,7 +323,7 @@ plot_general <- function(group_name, selected_measures){
   # trim to measures of interest
   df_totals <- totals_data %>%
     ungroup() %>%
-    filter(substring(position, 1, nchar("general")) == "general") %>%
+    filter(grepl("general", position, ignore.case = TRUE)) %>%
     left_join(role_controls, by = "role") %>%
     left_join(group_controls, by = "group_name") %>%
     filter(group_display_name == !!enquo(group_name)) %>%
@@ -339,7 +338,7 @@ plot_general <- function(group_name, selected_measures){
   
   df_categorical <- categorical_data %>%
     ungroup() %>%
-    filter(substring(position, 1, nchar("general")) == "general") %>%
+    filter(grepl("general", position, ignore.case = TRUE)) %>%
     left_join(role_controls, by = "role") %>%
     left_join(group_controls, by = "group_name") %>%
     filter(group_display_name == !!enquo(group_name)) %>%
@@ -353,15 +352,19 @@ plot_general <- function(group_name, selected_measures){
     distinct() %>%
     unlist(use.names = FALSE)
   
-  plot_totals_list <- lapply(totals_measures, function(x){ plot_general_figure(df_totals, x) })
-  plot_categorical_list <- lapply(categorical_measures, function(x){ plot_categorical_figure(df_categorical, x) })
+  plot_totals_list <- lapply(totals_measures, function(x){
+    plot_general_figure(df_totals, x, max_display_value(x, "general", selected_measures)) 
+  })
+  plot_categorical_list <- lapply(categorical_measures, function(x){
+    plot_categorical_figure(df_categorical, x, max_display_value(x, "general", selected_measures)) 
+  })
 
   return(c(plot_totals_list, plot_categorical_list))
 }  
   
 # supporting function to produce the actual plots
 # allowing for mutiple types of general plots
-plot_general_figure <- function(df, measure){
+plot_general_figure <- function(df, measure, max_display_value){
   # filter
   df <- df %>%
     ungroup() %>%
@@ -380,6 +383,7 @@ plot_general_figure <- function(df, measure){
     facet_grid(cols = vars(role_display_name)) +
     theme_bw() +
     theme(legend.position = "none") +
+    ylim(c(0,max_display_value)) +
     ylab(df$value_display_name[1]) +
     xlab("") +
     scale_fill_manual(values = with(df, setNames(description_display_colour, description_display_name))) +
@@ -390,7 +394,7 @@ plot_general_figure <- function(df, measure){
 
 # supporting function to produce the actual plots
 # allowing for mutiple types of general plots
-plot_categorical_figure <- function(df, measure){
+plot_categorical_figure <- function(df, measure, max_display_value){
   # filter
   df <- df %>%
     ungroup() %>%
@@ -403,7 +407,8 @@ plot_categorical_figure <- function(df, measure){
                                     levels = df_factors$category_display_name[order(df_factors$category_display_order)])
   
   # handle percentages
-  df$display_value = 100 * df$display_value
+  df$display_value <- 100 * df$display_value
+  max_display_value <- 100 * max_display_value
   
   # plot
   p <- ggplot(data = df) +
