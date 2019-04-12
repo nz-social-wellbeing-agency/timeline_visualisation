@@ -101,6 +101,13 @@ ui <- fluidPage(
              
              #### results ----
              div(textOutput("title"), style = "font-size:170%"),
+             p("The timeline shows the journey for a representative person. Not every person in the group experiences",
+               " every component of the representative journey. The percentages reported for the journey give the",
+               " percent of the group who have that component/measure in their journey."),
+             p("The timeline plot shows a representative experience for each component for people with the component.",
+               " For example, if 'Lab test (10%)' shows 1 event at fortnight 5, then 10% of the people in the",
+               " group had a lab test, the average number of fortnights with lab tests is 1, and the representative",
+               " timing this occurs in is fortnight 5."),
              hr(),
              
              lapply(role_list, FUN = function(role){
@@ -118,8 +125,6 @@ ui <- fluidPage(
              uiOutput("general_ui"),
              
              #### IDI disclaimer ----
-             hr(),
-             
              h6('IDI Disclaimer'),
              
              div(
@@ -132,9 +137,8 @@ ui <- fluidPage(
                " with security and confidentiality provisions of the Statistics Act 1975. Only people authorised",
                " by the Statistics Act 1975 are allowed to see data about a particular person, household, business,",
                " or organisation, and the results in this data table have been confidentialised to protect these", 
-               " groups from identification."),
-             
-             p("Careful consideration has been given to the privacy, security, and confidentiality issues associated",
+               " groups from identification. Careful consideration has been given to the privacy, security, and ",
+               " confidentiality issues associated",
                " with using administrative and survey data in the IDI. Further detail can be found in the Privacy",
                " impact assessment for the Integrated Data Infrastructure available from www.stats.govt.nz."),
              
