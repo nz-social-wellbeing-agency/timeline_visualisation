@@ -150,6 +150,30 @@ get_selected_measures <- function(reference_list, input, prefix = NULL, suffix =
   return(unlist(selected_measures, use.names = FALSE))
 }
 
+max_display_value <- function(value_type, position, selected_measures){
+  
+  df <- totals_data %>%
+    filter(position %in% !!enquo(position),
+           value_type == !!enquo(value_type)) %>%
+    left_join(description_controls, by = c("source", "description")) %>%
+    filter(description_display_name %in% !!enquo(selected_measures)) %>%
+    left_join(group_controls, by = "group_name") %>%
+    mutate(display_value = value / group_size) %>%
+    ungroup() %>%
+    summarise(max_value = max(display_value))
+  
+  # extract
+  max_value <- df %>% unlist(use.names = FALSE) %>% ceiling()
+  if(length(max_value) > 1)
+    stop("more than one max value")
+  
+  # handle percentages
+  if(grepl("percent",value_type,ignore.case = TRUE))
+    max_value <- 100 * max_value
+    
+  return(max_value)
+}
+
 
 ## plot timeline function ----
 plot_timeline <- function(group_name, role, selected_measures){
@@ -247,17 +271,21 @@ plot_pre_post <- function(group_name, role, selected_measures){
     unlist(use.names = FALSE)
     
   # plot pre
-  pre_plots <- lapply(plot_types, function(x){ plot_pre_post_figure(df, "pre", x) })
+  pre_plots <- lapply(plot_types, function(x){ 
+    plot_pre_post_figure(df, "pre", x, max_display_value(x, c("pre", "post"), selected_measures)) 
+  })
   
   # plot post
-  post_plots <- lapply(plot_types, function(x){ plot_pre_post_figure(df, "post", x) })
+  post_plots <- lapply(plot_types, function(x){
+    plot_pre_post_figure(df, "post", x, max_display_value(x, c("pre", "post"), selected_measures)) 
+  })
   
   return(list(pre = pre_plots, post = post_plots))
 }
 
 # supporting function to produce the actual plots
 # allowing for mutiple types of plots pre & post
-plot_pre_post_figure <- function(df, position, value_type){
+plot_pre_post_figure <- function(df, position, value_type, max_display_value){
   # filter
   df <- df %>%
     filter(position == !!enquo(position),
@@ -270,13 +298,14 @@ plot_pre_post_figure <- function(df, position, value_type){
   
   # handle percentages
   if(grepl("percent",df$value_display_name[1],ignore.case = TRUE))
-    df$display_value = 100 * df$display_value
+    df$display_value <- 100 * df$display_value
     
   # plot
   p <- ggplot(data = df) +
     geom_col(aes(x = description_display_name, y = display_value, fill = description_display_name)) +
     theme_bw() +
     theme(legend.position = "none") +
+    ylim(c(0,max_display_value)) +
     ylab(df$value_display_name[1]) +
     xlab("") +
     scale_fill_manual(values = with(df, setNames(description_display_colour, description_display_name))) +

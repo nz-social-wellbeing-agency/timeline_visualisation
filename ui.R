@@ -80,7 +80,8 @@ ui <- fluidPage(
                                        tmp_inputID <- paste0("pre_post_",gsub(" ","_",x),"_checkbox")
                                        return(checkboxGroupInput(tmp_inputID, label = x,
                                                                  choiceNames = pre_post_description_list[[x]],
-                                                                 choiceValues = pre_post_description_list[[x]]))
+                                                                 choiceValues = pre_post_description_list[[x]],
+                                                                 selected = pre_post_description_list[[x]]))
                                      }),
                               hr()
              ),
