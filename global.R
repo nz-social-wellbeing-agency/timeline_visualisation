@@ -36,6 +36,7 @@ library(tidyverse)
 library(readxl)
 
 ## parameters ----
+JOURNEY_LINE_MARGIN = 0.05
 HEIGHT_PIXELS <- 30
 MAX_PRE_POST_TYPES <- 3
 
