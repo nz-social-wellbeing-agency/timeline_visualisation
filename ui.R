@@ -29,7 +29,9 @@ ui <- fluidPage(
     tabPanel("Visualizations",
              
              br(),
+             div( p("DRAFT RESEARCH - IN CONFIDENCE - NOT GOVERNMENT POLICY"), style = "font-size:120%"),
              br(),
+             
              
              #### buttons ----
              actionButton("groupButton", "Group"),
@@ -115,7 +117,7 @@ ui <- fluidPage(
                conditionalPanel(condition = paste0("output.view_",gsub(" ","_",role),"== 'show'"), h3(role),
                                 uiOutput(paste0("journey_",gsub(" ","_",role),"_ui")),
                                 fluidRow(
-                                  uiOutput(paste0("post_",gsub(" ","_",role),"_ui"))
+                                  uiOutput(paste0("pre_post_",gsub(" ","_",role),"_ui"))
                                 ),
                                 hr()
                )

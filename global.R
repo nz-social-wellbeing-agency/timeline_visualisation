@@ -36,7 +36,6 @@ library(tidyverse)
 library(readxl)
 
 ## parameters ----
-JOURNEY_LINE_MARGIN <- 0.05
 HEIGHT_PIXELS <- 30
 MAX_PRE_POST_TYPES <- 3
 
@@ -237,7 +236,7 @@ plot_timeline <- function(group_name, role, selected_measures){
     geom_rect(aes(xmin = x_min, xmax = x_max, ymin = y_min_grey, ymax = y_max_grey), fill = 'grey') +
     geom_rect(aes(xmin = x_min, xmax = x_max, ymin = y_min, ymax = y_max, fill = description_display_colour)) +
     geom_vline(xintercept = 0, colour = 'orange', linetype = 'dashed', size = 1.5) +
-    geom_text(aes(x = -20, y = height + 1 - JOURNEY_LINE_MARGIN, label = plot_display_text), hjust = 0)
+    geom_text(aes(x = -20, y = height + 0.5, label = plot_display_text), hjust = 1, size = 5)
   
   p <- p  +
     theme_bw() +
@@ -245,7 +244,7 @@ plot_timeline <- function(group_name, role, selected_measures){
     scale_y_continuous(breaks = seq(0,-figure_height), minor_breaks = NULL,
                        name = NULL, labels = NULL, limits = c(-figure_height,0)) +
     xlab('Time from birth (fortnights)') +
-    xlim(-20,13) +
+    xlim(-26,14) +
     scale_fill_manual(values = with(df, setNames(description_display_colour, description_display_colour)))
     
   # return
@@ -275,25 +274,20 @@ plot_pre_post <- function(group_name, role, selected_measures){
     distinct() %>%
     unlist(use.names = FALSE)
     
-  # plot pre
-  pre_plots <- lapply(plot_types, function(x){ 
-    plot_pre_post_figure(df, "pre", x, max_display_value(x, c("pre", "post"), selected_measures)) 
+  # plot pre/post
+  pre_post_plots <- lapply(plot_types, function(x){ 
+    plot_pre_post_figure(df, x, max_display_value(x, c("pre", "post"), selected_measures)) 
   })
   
-  # plot post
-  post_plots <- lapply(plot_types, function(x){
-    plot_pre_post_figure(df, "post", x, max_display_value(x, c("pre", "post"), selected_measures)) 
-  })
-  
-  return(list(pre = pre_plots, post = post_plots))
+  return(pre_post_plots)
 }
 
 # supporting function to produce the actual plots
 # allowing for mutiple types of plots pre & post
-plot_pre_post_figure <- function(df, position, value_type, max_display_value){
+plot_pre_post_figure <- function(df, value_type, max_display_value){
   # filter
   df <- df %>%
-    filter(value_type == !!enquo(value_type)) %>%
+    filter(value_type %in% !!enquo(value_type)) %>%
     mutate(tmp_display_order = 10000 * type_display_order + description_display_order) %>%
     select(value_display_name, display_value, description_display_name, description_display_colour, 
            position, tmp_display_order)

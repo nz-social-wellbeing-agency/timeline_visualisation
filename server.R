@@ -270,40 +270,26 @@ server <- function(input, output, session) {
     local({
       rr <- role
       rr_staging <- paste0(gsub(" ","_",rr), "_pre_post")
-      rr_pre_plot <- paste0("pre_",gsub(" ","_",rr))
-      rr_pre_ui <- paste0("pre_",gsub(" ","_",rr),"_ui")
-      rr_post_plot <- paste0("post_",gsub(" ","_",rr))
-      rr_post_ui <- paste0("post_",gsub(" ","_",rr),"_ui")
-
+      rr_pre_post_plot <- paste0("pre_post_",gsub(" ","_",rr))
+      rr_pre_post_ui <- paste0("pre_post_",gsub(" ","_",rr),"_ui")
+      
       # plotters for the dynamic number of pre/post plots
       for(ii in 1:MAX_PRE_POST_TYPES){
         local({
           this_i <- ii
-          tmp_pre <- paste0(rr_pre_plot,"_",this_i)
-          output[[tmp_pre]] <- renderPlot({ 
-            req(length(output_staging[[rr_staging]]$pre) >= this_i) # avoids error accessing unavailable subscripts
-            output_staging[[rr_staging]]$pre[[this_i]] })
-          tmp_post <- paste0(rr_post_plot,"_",this_i)
-          output[[tmp_post]] <- renderPlot({
-            req(length(output_staging[[rr_staging]]$post) >= this_i) # avoids error accessing unavailable subscripts
-            output_staging[[rr_staging]]$post[[this_i]] })
+          tmp_pre_post <- paste0(rr_pre_post_plot,"_",this_i)
+          output[[tmp_pre_post]] <- renderPlot({ 
+            req(length(output_staging[[rr_staging]]) >= this_i) # avoids error accessing unavailable subscripts
+            output_staging[[rr_staging]][[this_i]] })
         })
       }
 
-      # UI components for the pre plots
-      output[[rr_pre_ui]] <- renderUI({
-        req(output_staging[[rr_staging]]$pre[[1]])
+      # UI components for the pre/post plots
+      output[[rr_pre_post_ui]] <- renderUI({
+        req(output_staging[[rr_staging]][[1]])
         
-        lapply(1:length(output_staging[[rr_staging]]$pre),
-               function(ii){ plotOutput(paste0(rr_pre_plot,"_",ii), height = 200) })
-      })
-      
-      # UI components for the post plots
-      output[[rr_post_ui]] <- renderUI({
-        req(output_staging[[rr_staging]]$post[[1]])
-        
-        lapply(1:length(output_staging[[rr_staging]]$post),
-               function(ii){ column(4, plotOutput(paste0(rr_post_plot,"_",ii), height = 300)) })
+        lapply(1:length(output_staging[[rr_staging]]),
+               function(ii){ column(4, plotOutput(paste0(rr_pre_post_plot,"_",ii), height = 300)) })
       })
     })
   }
