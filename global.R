@@ -22,11 +22,17 @@
 # to support development
 setwd('C:/NotBackedUp/shiny apps/timeline_visualisation')
 
+# auto install
+package_list = c("shiny", "shinyWidgets", "tidyverse", "readxl")
+for(package in package_list)
+  if(! package %in% installed.packages())
+    install.packages(package)
+
 ## required packages ----
 library(shiny)
 library(shinyWidgets)
 library(tidyverse)
-library(plotly)
+# library(plotly)
 library(readxl)
 
 ## parameters ----
