@@ -45,7 +45,8 @@ ui <- fluidPage(
              
              #### controls ----
              conditionalPanel(condition = "output.view_group == 'show'",
-                              selectInput("group_selectInput", "Select group to investigate", choices = group_list),
+                              selectInput("group_selectInput", "Select group to investigate",
+                                          choices = group_list, width = "400px", selectize = FALSE, size = 24),
                               hr()
              ),
              

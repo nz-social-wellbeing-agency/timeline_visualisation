@@ -169,7 +169,7 @@ max_display_value <- function(value_type, position, selected_measures){
     summarise(max_value = max(display_value))
   
   # extract
-  max_value <- df %>% unlist(use.names = FALSE) %>% ceiling()
+  max_value <- df %>% unlist(use.names = FALSE) %>% round(3) %>% ceiling()
   if(length(max_value) > 1)
     stop("more than one max value")
   

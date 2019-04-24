@@ -239,7 +239,7 @@ server <- function(input, output, session) {
   update_general <- function(){
     selected_measures <- get_selected_measures(general_description_list, input,
                                                prefix = "general_", suffix = "_checkbox")
-
+    
     output_staging$general <- plot_general(input$group_selectInput, selected_measures)
   }
 
