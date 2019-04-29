@@ -126,6 +126,21 @@ ui <- fluidPage(
              
              uiOutput("general_ui"),
              
+             #### SIA tool disclaimer ----
+             h6('Tool disclaimer'),
+             
+             div(
+               p("This tool has been created to help users visualise and draw insight from data that includes timelines.",
+                 " The opinions, findings, insights, recommendations, and conclusions arising from the use of this tool",
+                 " are those of the users, not those of the Social Investment Agency (SIA), nor those of the data owners",
+                 " or providers."),
+               
+               p("The tool is licensed under the GNU General Public License v3.0, a copy of which can be found here:",
+                 " https://www.gnu.org/licenses/gpl-3.0.html. Any data provided with this tool may have its own license,",
+                 " disclaimer, or warranty distinct from that of this tool."),
+               style = "font-size:70%"
+             ),
+             
              #### IDI disclaimer ----
              h6('IDI Disclaimer'),
              
