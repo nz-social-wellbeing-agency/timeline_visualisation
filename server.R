@@ -146,7 +146,7 @@ server <- function(input, output, session) {
   })
   
   ## quick select buttons for journey -------------------------------------------------------------
-  #### observers ----
+  #### observers for journey ----
   observeEvent(input$journey_all_button,{
     for(x in names(journey_description_list)){
       tmp_inputID <- paste0("journey_",gsub(" ","_",x),"_checkbox")
@@ -178,6 +178,38 @@ server <- function(input, output, session) {
     }
   })
 
+  #### observers for pre & post ----
+  observeEvent(input$pre_post_all_button,{
+    for(x in names(pre_post_description_list)){
+      tmp_inputID <- paste0("pre_post_",gsub(" ","_",x),"_checkbox")
+      updateCheckboxGroupInput(session, tmp_inputID,
+                               selected = pre_post_description_list[[x]])
+    }
+  })
+  
+  observeEvent(input$pre_post_common_button,{
+    for(x in names(pre_post_description_list)){
+      tmp_inputID <- paste0("pre_post_",gsub(" ","_",x),"_checkbox")
+      
+      selection <- description_controls %>%
+        filter(description_display_type == !!enquo(x),
+               is_common_journey_element == 1) %>%
+        select(description_display_name) %>%
+        unlist(use.names = FALSE)
+      
+      updateCheckboxGroupInput(session, tmp_inputID,
+                               selected = selection)
+    }
+  })
+  
+  observeEvent(input$pre_post_none_button,{
+    for(x in names(pre_post_description_list)){
+      tmp_inputID <- paste0("pre_post_",gsub(" ","_",x),"_checkbox")
+      updateCheckboxGroupInput(session, tmp_inputID,
+                               selected = character(0))
+    }
+  })
+  
   ## visualisation staging ------------------------------------------------------------------------
   #### setup ----
   output_staging <- reactiveValues()

@@ -78,6 +78,10 @@ ui <- fluidPage(
              conditionalPanel(condition = "output.view_prepost == 'show'",
                               h4("Select measures to appear pre & post the journey"),
                               
+                              actionButton("pre_post_all_button", "All"),
+                              actionButton("pre_post_common_button", "Common"),
+                              actionButton("pre_post_none_button", "None"),
+                              
                               lapply(names(pre_post_description_list),
                                      FUN = function(x){
                                        tmp_inputID <- paste0("pre_post_",gsub(" ","_",x),"_checkbox")

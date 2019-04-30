@@ -155,7 +155,7 @@ update_logicals <- function(logical_list, to_false = NULL, to_true = NULL, toggl
 get_selected_measures <- function(reference_list, input, prefix = NULL, suffix = NULL){
   selected_measures <- lapply(names(reference_list),
                               FUN = function(x){
-                                input_checkboxgroup <- paste0(prefix, gsub("[ /\\?()-]","_",x), suffix)
+                                input_checkboxgroup <- paste0(prefix, gsub("[ ,+/\\?()-]","_",x), suffix)
                                 return(input[[input_checkboxgroup]])
                               })
   return(unlist(selected_measures, use.names = FALSE))

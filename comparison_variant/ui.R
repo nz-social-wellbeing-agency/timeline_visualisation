@@ -68,7 +68,7 @@ ui <- fluidPage(
                               
                               lapply(names(journey_description_list),
                                      FUN = function(x){
-                                       tmp_inputID <- paste0("journey_",gsub("[ /\\?()-]","_",x),"_checkbox")
+                                       tmp_inputID <- paste0("journey_",gsub("[ ,+/\\?()-]","_",x),"_checkbox")
                                        return(checkboxGroupInput(tmp_inputID, label = x,
                                                                  choiceNames = journey_description_list[[x]],
                                                                  choiceValues = journey_description_list[[x]]))
@@ -79,9 +79,13 @@ ui <- fluidPage(
              conditionalPanel(condition = "output.view_prepost == 'show'",
                               h4("Select measures to appear pre & post the journey"),
                               
+                              actionButton("pre_post_all_button", "All"),
+                              actionButton("pre_post_common_button", "Common"),
+                              actionButton("pre_post_none_button", "None"),
+                              
                               lapply(names(pre_post_description_list),
                                      FUN = function(x){
-                                       tmp_inputID <- paste0("pre_post_",gsub("[ /\\?()-]","_",x),"_checkbox")
+                                       tmp_inputID <- paste0("pre_post_",gsub("[ ,+/\\?()-]","_",x),"_checkbox")
                                        return(checkboxGroupInput(tmp_inputID, label = x,
                                                                  choiceNames = pre_post_description_list[[x]],
                                                                  choiceValues = pre_post_description_list[[x]]))
@@ -94,7 +98,7 @@ ui <- fluidPage(
                               
                               lapply(names(general_description_list),
                                      FUN = function(x){
-                                       tmp_inputID <- paste0("general_",gsub("[ /\\?()-]","_",x),"_checkbox")
+                                       tmp_inputID <- paste0("general_",gsub("[ ,+/\\?()-]","_",x),"_checkbox")
                                        return(checkboxGroupInput(tmp_inputID, label = x,
                                                                  choiceNames = general_description_list[[x]],
                                                                  choiceValues = general_description_list[[x]]))
@@ -115,10 +119,10 @@ ui <- fluidPage(
              
              lapply(group_list, FUN = function(gg){
                
-               conditionalPanel(condition = paste0("output.view_",gsub("[ /\\?()-]","_",gg),"== 'show'"), h3(gg),
-                                uiOutput(paste0("journey_",gsub("[ /\\?()-]","_",gg),"_ui")),
+               conditionalPanel(condition = paste0("output.view_",gsub("[ ,+/\\?()-]","_",gg),"== 'show'"), h3(gg),
+                                uiOutput(paste0("journey_",gsub("[ ,+/\\?()-]","_",gg),"_ui")),
                                 fluidRow(
-                                  uiOutput(paste0("pre_post_",gsub("[ /\\?()-]","_",gg),"_ui"))
+                                  uiOutput(paste0("pre_post_",gsub("[ ,+/\\?()-]","_",gg),"_ui"))
                                 ),
                                 hr()
                )

@@ -48,7 +48,7 @@ server <- function(input, output, session) {
       #checkbox matching begins here
       #Create a manual list of checkbox names
       check_box_names <- lapply(names(journey_description_list),
-                                FUN = function(x){ paste0(gsub("[ /\\?()-]","_",x),"_checkbox") })
+                                FUN = function(x){ paste0(gsub("[ ,+/\\?()-]","_",x),"_checkbox") })
       
       #dummy dataframe to store values
       check.box.data.frame.loader <- data.frame(matrix(NA, nrow = 1, ncol = length(check_box_names)))
@@ -93,7 +93,7 @@ server <- function(input, output, session) {
   
   # panel list
   control_panel_logicals <- c("view_group", "view_role", "view_journey", "view_prepost", "view_general")
-  group_panel_logicals <- sapply(group_list, function(x){ paste0("view_", gsub("[ /\\?()-]","_",x)) }, USE.NAMES = FALSE)
+  group_panel_logicals <- sapply(group_list, function(x){ paste0("view_", gsub("[ ,+/\\?()-]","_",x)) }, USE.NAMES = FALSE)
   
   # setup each conditional panel:
   # 1 - reactive logical for display/not
@@ -146,10 +146,10 @@ server <- function(input, output, session) {
   })
   
   ## quick select buttons for journey -------------------------------------------------------------
-  #### observers ----
+  #### observers for journey ----
   observeEvent(input$journey_all_button,{
     for(x in names(journey_description_list)){
-      tmp_inputID <- paste0("journey_",gsub("[ /\\?()-]","_",x),"_checkbox")
+      tmp_inputID <- paste0("journey_",gsub(" ","_",x),"_checkbox")
       updateCheckboxGroupInput(session, tmp_inputID,
                                selected = journey_description_list[[x]])
     }
@@ -157,7 +157,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$journey_common_button,{
     for(x in names(journey_description_list)){
-      tmp_inputID <- paste0("journey_",gsub("[ /\\?()-]","_",x),"_checkbox")
+      tmp_inputID <- paste0("journey_",gsub(" ","_",x),"_checkbox")
       
       selection <- description_controls %>%
         filter(description_display_type == !!enquo(x),
@@ -172,7 +172,39 @@ server <- function(input, output, session) {
   
   observeEvent(input$journey_none_button,{
     for(x in names(journey_description_list)){
-      tmp_inputID <- paste0("journey_",gsub("[ /\\?()-]","_",x),"_checkbox")
+      tmp_inputID <- paste0("journey_",gsub(" ","_",x),"_checkbox")
+      updateCheckboxGroupInput(session, tmp_inputID,
+                               selected = character(0))
+    }
+  })
+  
+  #### observers for pre & post ----
+  observeEvent(input$pre_post_all_button,{
+    for(x in names(pre_post_description_list)){
+      tmp_inputID <- paste0("pre_post_",gsub(" ","_",x),"_checkbox")
+      updateCheckboxGroupInput(session, tmp_inputID,
+                               selected = pre_post_description_list[[x]])
+    }
+  })
+  
+  observeEvent(input$pre_post_common_button,{
+    for(x in names(pre_post_description_list)){
+      tmp_inputID <- paste0("pre_post_",gsub(" ","_",x),"_checkbox")
+      
+      selection <- description_controls %>%
+        filter(description_display_type == !!enquo(x),
+               is_common_journey_element == 1) %>%
+        select(description_display_name) %>%
+        unlist(use.names = FALSE)
+      
+      updateCheckboxGroupInput(session, tmp_inputID,
+                               selected = selection)
+    }
+  })
+  
+  observeEvent(input$pre_post_none_button,{
+    for(x in names(pre_post_description_list)){
+      tmp_inputID <- paste0("pre_post_",gsub(" ","_",x),"_checkbox")
       updateCheckboxGroupInput(session, tmp_inputID,
                                selected = character(0))
     }
@@ -196,7 +228,7 @@ server <- function(input, output, session) {
     for(group in group_list){
       local({
         gg <- group
-        panel_control[[paste0("view_", gsub("[ /\\?()-]","_",gg))]] <- gg %in% input$group_checkbox
+        panel_control[[paste0("view_", gsub("[ ,+/\\?()-]","_",gg))]] <- gg %in% input$group_checkbox
       })
     }
   }
@@ -209,7 +241,7 @@ server <- function(input, output, session) {
     for(group in input$group_checkbox){
       local({
         gg <- group
-        gg_staging <- paste0(gsub("[ /\\?()-]","_",gg), "_journey")
+        gg_staging <- paste0(gsub("[ ,+/\\?()-]","_",gg), "_journey")
         output_staging[[gg_staging]] <- plot_timeline(gg, input$role_selectInput, selected_measures)
       })
     }
@@ -223,7 +255,7 @@ server <- function(input, output, session) {
     for(group in input$group_checkbox){
       local({
         gg <- group
-        gg_staging <- paste0(gsub("[ /\\?()-]","_",gg), "_pre_post")
+        gg_staging <- paste0(gsub("[ ,+/\\?()-]","_",gg), "_pre_post")
         output_staging[[gg_staging]] <- plot_pre_post(gg, input$role_selectInput, selected_measures)
       })
     }
@@ -245,9 +277,9 @@ server <- function(input, output, session) {
   for(group in group_list){
     local({
       gg <- group
-      gg_staging <- paste0(gsub("[ /\\?()-]","_",gg), "_journey")
-      gg_plot <- paste0("journey_",gsub("[ /\\?()-]","_",gg))
-      gg_ui <- paste0("journey_",gsub("[ /\\?()-]","_",gg),"_ui")
+      gg_staging <- paste0(gsub("[ ,+/\\?()-]","_",gg), "_journey")
+      gg_plot <- paste0("journey_",gsub("[ ,+/\\?()-]","_",gg))
+      gg_ui <- paste0("journey_",gsub("[ ,+/\\?()-]","_",gg),"_ui")
       
       output[[gg_plot]] <- renderPlot( output_staging[[gg_staging]]$figure )
       
@@ -262,9 +294,9 @@ server <- function(input, output, session) {
   for(group in group_list){
     local({
       gg <- group
-      gg_staging <- paste0(gsub("[ /\\?()-]","_",gg), "_pre_post")
-      gg_pre_post_plot <- paste0("pre_post_",gsub("[ /\\?()-]","_",gg))
-      gg_pre_post_ui <- paste0("pre_post_",gsub("[ /\\?()-]","_",gg),"_ui")
+      gg_staging <- paste0(gsub("[ ,+/\\?()-]","_",gg), "_pre_post")
+      gg_pre_post_plot <- paste0("pre_post_",gsub("[ ,+/\\?()-]","_",gg))
+      gg_pre_post_ui <- paste0("pre_post_",gsub("[ ,+/\\?()-]","_",gg),"_ui")
       
       # plotters for the dynamic number of pre/post plots
       for(ii in 1:MAX_PRE_POST_TYPES){
