@@ -1,7 +1,73 @@
 # timeline_visualisation
+
+An interactive visualisation tool for exploring journey timelines. Developed as part of SIA's cross-sector representative timeline modeling, however it can be used independently of our timeline construction methodology.
+
+## Overview
+
+
+
+
+## Dependencies
+
+
+### Data
+
 Shiny visualisation of journey timelines
 
 Before releasing publically: Confirm data version with appropriate decision maker.
 
 In anticipation that the full dataset will not be suitable for release, we have produced a cut down version that is expected to be suitable for release. This is still to be reviewed.
 
+
+
+
+### Packages
+
+The visualsiation tool requires swveral R packages in order to run. These are not programs, but public code of a similar nature to the code files included in this repositry (but developed and reviewed by much larger teams of professional developers).
+
+The four code packages are shiny, shinywidgets, tidyverse and readxl. All four of these packages are well established and reviewed. As the packages can be updated from time to time users experiencing difficulties may wish to download the exact same version of these packages as were used in the development of the interactive visualisation. The versions of each packages are as follows: shiny, version 1.3.2; shinywidgets, version 0.4.8; tidyverse, version 1.2.1; and readxl, version 1.3.1.
+
+## Installation
+
+Depending on your existing environment, expertise, and intended use of the visualisation app the steps you need to install the app may vary. Consider each of the following sections in turn.
+
+### R and RStudio
+
+The visualisation app is written in R and is easiest to run in the RStudio environment. If you do not have these programs installed already you will need to install them in order to use the timeline visualisation. R can be downloaded from https://cran.r-project.org and RStudio can be downloaded from https://www.rstudio.com. Both are free.
+
+While different versions of R and RStudio are unlikely to prevent you using the timeline visuaisation, the versions that were used in the development of the visualisation app are R versions 3.5.2 (2018-12-20) - "Eggshell Igloo", and RStudio version 1.1.463.
+
+### Preparing your own data
+
+This code repository only includes artificial (made-up) data for demonstration purposes. To use the visualisation for another dataset you will either need to prepare your own data in the required format, or use a dataset that has already been prepared for you. To test the visualisation app with the example data you will first need to rename both data files, removing the "\_EXAMPLE" from the end.
+
+Any data prepared according to the correct pattern can be read and displayed by the timeline visualisation tool. To prepare your own data for use in the visualisation you will need to arrange it in the same way that the example data files are set out. Two data files are required, **input_date.xlsx** that contains the data for display (e.g. timing of events), and **data_controls.xlsx** that contains information for how the data should be presented (e.g. labels, order, colours).
+
+### Running the app
+
+Once you have R and RStudio installed and the data prepared, complete the following steps to run the app:
+
+ - Create a local copy of this repository on your computer.
+ - Copy the data files into the **www** folder.
+ - Open **global.R** of the version you want to run in RStudio.
+ - If this is the first time you have run the app, ensure you have internet connectivity.
+ - You should see a button labelled "Source" or "Run APP" click it.
+
+A new window should open providing you with the interactive timeline visualisation.
+
+If this is your first time running the app, it may need to download several R code packages. This may take some time. As discussed above, the four code packages are shiny, shinywidgets, tidyverse and readxl. All four of these packages are well established and reviewed, open source bundles of R code. They are not programs by themselves, but public code that the visualisation app needs to work.
+
+## Folder and file descriptions
+The folder contains the code needed to run two different versions of the visualisation. The base version allows for the viewing of a single group (e.g. people of Pacific ethnicity) with multiple roles (e.g. mothers and fathers) side-by-side. The comparison variant allows for the viewing of multiple groups (e.g. Maori, Pacific, Asian, and European ethnicities) side-by-side but is limited to only a single role (e.g. mother) at a time.
+
+The key files and folders are:
+
+**global.R** is one of the core files for the base version of the visualsation app, it is responsible for the initial setup and preparation.
+**server.R** is one of the core files for the base version of the visualsation app, it is responsible for the background calculations and data management.
+**ui.R** is one of the core files for the base version of the visualsation app, it is responsible for the display and responsiveness of the user interface.
+**reference_app.R** is a docmentation file, providing a demonstration of a less common coding technique used in the app. Developers seeking to modify the code are advised to first familiarse themselves with the contents of this demo.
+**comparison_variant** contains all the equivalent core files (global, server and ui) for the comparison variant of the visualisation app.
+**www** contains the data files loaded by the app when it is run. Users seeking to investigate different data files should place them here.
+
+## Getting Help
+If you have any questions email info@sia.govt.nz
