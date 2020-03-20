@@ -4,13 +4,13 @@ An interactive visualisation tool for exploring journey timelines.
 
 ## Overview
 
-This repsoitory contains the code necessary to run SIA's interactive timeline visualisation tool. Developed as part of SIA's cross-sector representative timeline modeling, however it can be used independently of our timeline construction methodology (https://github.com/nz-social-investment-agency/representative_timelines).
+This repsoitory contains the code necessary to run our's interactive timeline visualisation tool. Developed as part of the Social Wellbeing Agency's cross-sector representative timeline modeling, however it can be used independently of our timeline construction methodology (https://github.com/nz-social-wellbeing-agency/representative_timelines).
 
 ## License for timeline visualisation
 
 Crown copyright (c) 2019, Social Investment Agency on behalf of the New Zealand Government.
 
-GNU General Public License v3.0. See ![LICENSE.md](https://github.com/nz-social-investment-agency/timeline_visualisation/blob/master/LICENSE) for more details. In essence, you are free to copy, distribute and adapt the work, as long as you attribute the work to the New Zealand Government and abide by the other licence terms.
+GNU General Public License v3.0. See ![LICENSE.md](https://github.com/nz-social-wellbeing-agency/timeline_visualisation/blob/master/LICENSE) for more details. In essence, you are free to copy, distribute and adapt the work, as long as you attribute the work to the New Zealand Government and abide by the other licence terms.
 
 Please note that neither the New Zealand Government emblem nor the New Zealand Government logo may be used in any way which infringes any provision of the [Flags, Emblems, and Names Protection Act 1981](http://www.legislation.govt.nz/act/public/1981/0047/latest/whole.html) or would infringe such provision if the relevant use occurred within New Zealand. Attribution to the New Zealand Government should be in written form and not by reproduction of any emblem or the New Zealand Government logo.
 
@@ -81,4 +81,4 @@ The key files and folders are:
 - **www** contains the data files loaded by the app when it is run. Users seeking to investigate different data files should place them here.
 
 ## Getting Help
-If you have any questions email info@sia.govt.nz
+If you have any questions email info@swa.govt.nz
