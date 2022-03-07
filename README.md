@@ -1,4 +1,4 @@
-# timeline_visualisation
+# Timeline Visualisation
 
 An interactive visualisation tool for exploring journey timelines.
 
@@ -79,6 +79,10 @@ The key files and folders are:
 - **reference_app.R** is a docmentation file, providing a demonstration of a less common coding technique used in the app. Developers seeking to modify the code are advised to first familiarse themselves with the contents of this demo.
 - **comparison_variant** contains all the equivalent core files (global, server and ui) for the comparison variant of the visualisation app.
 - **www** contains the data files loaded by the app when it is run. Users seeking to investigate different data files should place them here.
+
+## Citation
+
+Social Wellbeing Agency (2019). Timeline visualisation. Source code. https://github.com/nz-social-wellbeing-agency/timeline_visualisation
 
 ## Getting Help
 If you have any questions email info@swa.govt.nz
